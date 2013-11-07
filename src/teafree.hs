@@ -24,7 +24,7 @@ import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TIO
 
 version :: T.Text
-version = "0.1.0"
+version = "0.1.0.0"
 
 releaseName :: T.Text
 releaseName = "A pale blue coconut"
