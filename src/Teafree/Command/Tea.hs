@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 {-
 
@@ -20,33 +20,14 @@
 
 -}
 
-module Main where
+module Teafree.Command.Tea
+    ( printList
+    ) where
 
-import System.Console.CmdArgs
+import qualified Data.Text.Lazy as T
+import qualified Data.Text.Lazy.IO as TIO
 
-import qualified Teafree.Version as V
-import qualified Teafree.Command.Tea as T
-
-{- Teafree available modes -}
-data TeafreeMode = Teas
-        deriving ( Data, Typeable, Show, Eq)
-
-{- Teas mode -}
-teas :: TeafreeMode
-teas = Teas
-
-{- Teafree mode -}
-mode :: Mode (CmdArgs TeafreeMode)
-mode = cmdArgsMode $ modes [teas]
-    &= program "teafree"
-    &= summary "A Haskell utility for tea addicts"
-    &= helpArg [explicit, name "help", name "h"]
-    &= versionArg [explicit, name "version", name "v", summary V.release]
-
-{- Entry point -}
-main :: IO ()
-main = cmdArgsRun mode >>= runMode
-
-{- Run a specific mode -}
-runMode :: TeafreeMode -> IO ()
-runMode Teas = T.printList
+{- Print the list of teas -}
+printList :: IO ()
+printList = do
+    TIO.putStrLn "White\nGreen\nBlack"
