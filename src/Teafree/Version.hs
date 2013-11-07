@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,33 +18,20 @@
 
 -}
 
-module Main where
+module Teafree.Version
+    ( release
+    , releaseVersion
+    , releaseName
+    ) where
 
-import System.Console.CmdArgs
+{- Release version and name -}
+release :: String
+release = releaseVersion ++ " " ++ show releaseName
 
-import qualified Teafree.Version as V
-import qualified Teafree.Command.Tea as T
+{- Release version -}
+releaseVersion :: String
+releaseVersion = "0.1.0.0"
 
-{- Teafree available modes -}
-data TeafreeMode = Teas
-        deriving ( Data, Typeable, Show, Eq)
-
-{- Teas mode -}
-teas :: TeafreeMode
-teas = Teas
-
-{- Teafree mode -}
-mode :: Mode (CmdArgs TeafreeMode)
-mode = cmdArgsMode $ modes [teas]
-    &= program "teafree"
-    &= summary "A Haskell utility for tea addicts"
-    &= helpArg [explicit, name "help", name "h"]
-    &= versionArg [explicit, name "version", name "v", summary V.release]
-
-{- Entry point -}
-main :: IO ()
-main = cmdArgsRun mode >>= runMode
-
-{- Run a specific mode -}
-runMode :: TeafreeMode -> IO ()
-runMode Teas = T.printList
+{- Release name -}
+releaseName :: String
+releaseName = "A pale blue coconut"
