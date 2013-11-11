@@ -25,19 +25,25 @@ module Main where
 import System.Console.CmdArgs
 
 import qualified Teafree.Version as V
-import qualified Teafree.Command.Tea as T
+import qualified Teafree.Command.List as CL
+import qualified Teafree.Command.Prepare as CP
 
 {- Teafree available modes -}
-data TeafreeMode = Teas
+data TeafreeMode = List
+                 | Prepare
         deriving ( Data, Typeable, Show, Eq)
 
 {- Teas mode -}
-teas :: TeafreeMode
-teas = Teas
+list :: TeafreeMode
+list = List
+
+{- Prepare mode -}
+prepare :: TeafreeMode
+prepare = Prepare
 
 {- Teafree mode -}
 mode :: Mode (CmdArgs TeafreeMode)
-mode = cmdArgsMode $ modes [teas]
+mode = cmdArgsMode $ modes [list, prepare]
     &= program "teafree"
     &= summary "A Haskell utility for tea addicts"
     &= helpArg [explicit, name "help", name "h"]
@@ -49,4 +55,5 @@ main = cmdArgsRun mode >>= runMode
 
 {- Run a specific mode -}
 runMode :: TeafreeMode -> IO ()
-runMode Teas = T.printList
+runMode List = CL.printList
+runMode Prepare = CP.prepare

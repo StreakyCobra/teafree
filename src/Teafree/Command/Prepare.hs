@@ -20,14 +20,31 @@
 
 -}
 
-module Teafree.Command.Tea
-    ( printList
+module Teafree.Command.Prepare
+    ( prepare
     ) where
 
-import qualified Data.Text.Lazy as T
-import qualified Data.Text.Lazy.IO as TIO
+import Shelly
+import Control.Monad
+import Control.Concurrent
+import Data.Text as T
+default (T.Text)
 
-{- Print the list of teas -}
-printList :: IO ()
-printList = do
-    TIO.putStrLn "White\nGreen\nBlack"
+{- Prepare a tea -}
+prepare :: IO ()
+prepare = shellyNoDir $ print_stdout False $ do
+    choice <- (liftM T.unlines listTeas) -|- chooser
+    teaTime <- return $ 2
+    liftIO . threadDelay . (*1000000) $ teaTime
+    notify choice
+
+{- List all teas -}
+listTeas :: Sh [Text]
+listTeas = lsT "/home/fabien"
+
+{- Permit to choose an element from STDIN -}
+chooser :: Sh Text
+chooser = run "dmenu" []
+
+notify :: Text -> Sh ()
+notify choice = run_ "notify-send" ["Test", choice]
