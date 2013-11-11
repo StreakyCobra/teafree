@@ -27,24 +27,29 @@ module Teafree.Command.Prepare
 import Shelly
 import Control.Monad
 import Control.Concurrent
+import Control.Exception
 import Data.Text as T
 default (T.Text)
 
 {- Prepare a tea -}
 prepare :: IO ()
-prepare = shellyNoDir $ print_stdout False $ do
-    choice <- (liftM T.unlines listTeas) -|- chooser
+prepare = shellyNoDir $ silently $ print_stdout False $ do
+    choice <- chooseTea
     teaTime <- return $ 2
     liftIO . threadDelay . (*1000000) $ teaTime
     notify choice
 
-{- List all teas -}
-listTeas :: Sh [Text]
-listTeas = lsT "/home/fabien"
+chooseTea :: Sh Text
+chooseTea = listOfTeas -|- chooser
+    where listOfTeas :: Sh Text
+          listOfTeas = liftM T.unlines $ lsT "."
 
-{- Permit to choose an element from STDIN -}
 chooser :: Sh Text
-chooser = run "dmenu" []
+chooser = catch_sh
+            (run "dmenu" ["-i", "-p", "Tea:", "-l", "10"])
+            ((\_ -> exit 1) :: SomeException -> Sh Text)
 
 notify :: Text -> Sh ()
-notify choice = run_ "notify-send" ["Test", choice]
+notify choice = run_ "notify-send" ["-t", "0", "-u", "critical", "-i", icon, "Your tea is ready", name]
+    where icon = ""
+          name = choice
