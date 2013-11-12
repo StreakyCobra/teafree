@@ -24,7 +24,7 @@ module Main where
 
 import System.Console.CmdArgs
 
-import qualified Teafree.Version as V
+import qualified Teafree.Core.Version as V
 import qualified Teafree.Command.List as CL
 import qualified Teafree.Command.Prepare as CP
 
