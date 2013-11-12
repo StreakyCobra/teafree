@@ -18,7 +18,7 @@
 
 -}
 
-module Teafree.Version
+module Teafree.Core.Version
     ( release
     , releaseVersion
     , releaseName
