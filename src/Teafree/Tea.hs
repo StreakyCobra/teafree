@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, TypeOperators #-}
+{-# LANGUAGE TemplateHaskell, TypeOperators, OverloadedStrings #-}
 
 {-
 
@@ -23,13 +23,23 @@
 module Teafree.Tea where
 
 import Data.Label
+import Text.Printf
 
 import Teafree.Category
+import Teafree.Interaction.Format
+import Teafree.Units
 
 data Tea = Tea
-    { _name       :: String
-    , _category   :: Category
+    { _name        :: String
+    , _category    :: Category
+    , _quantity    :: Quantity
+    , _temperature :: Temperature
+    , _time        :: Time
+    , _cafeine     :: Percentage
     } deriving (Show)
 
 mkLabel ''Tea
+
+instance ToDoc Tea where
+    toDoc f t = "Tea {"
 

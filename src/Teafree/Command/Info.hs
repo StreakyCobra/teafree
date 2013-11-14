@@ -20,11 +20,10 @@
 
 -}
 
-module Teafree.Command.Prepare
-    ( prepare
+module Teafree.Command.Info
+    ( info
     ) where
 
-import Control.Concurrent
 import Data.Text as T
 import Shelly
 
@@ -35,9 +34,7 @@ import Teafree.Interaction.Choice
 default (T.Text)
 
 {- Prepare a tea -}
-prepare :: Teafree ()
-prepare = shellyNoDir $ silently $ print_stdout False $ do
+info :: Teafree ()
+info = shellyNoDir $ silently $ print_stdout False $ do
     choice <- chooseTea
-    teaTime <- return $ 2
-    liftIO . threadDelay . (*1000000) $ teaTime
-    send $ notification 0 "The tea is ready" choice
+    send $ notification 5 "Information" choice
