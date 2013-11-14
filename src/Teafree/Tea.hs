@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell, TypeOperators #-}
+
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -18,17 +20,16 @@
 
 -}
 
-module Teafree.Command.List
-    ( printList
-    ) where
+module Teafree.Tea where
 
 import Data.Label
 
-import Teafree.Core.Monad
-import Teafree.Core.Environment
+import Teafree.Category
 
-{- Print the list of teas -}
-printList :: String -> Teafree ()
-printList "teas" = do
-    liftIO $ putStrLn "White\nGreen\nBlack"
-printList w = failure $ "There is no list of \"" ++ w ++ "\""
+data Tea = Tea
+    { _name       :: String
+    , _category   :: Category
+    } deriving (Show)
+
+mkLabel ''Tea
+
