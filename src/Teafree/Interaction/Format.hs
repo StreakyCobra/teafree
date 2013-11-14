@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,24 +18,23 @@
 
 -}
 
-module Teafree.Command.Prepare
-    ( prepare
-    ) where
+module Teafree.Interaction.Format where
 
-import Control.Concurrent
+import Data.Label
 import Data.Text as T
-import Shelly
+default(T.Text)
 
-import Teafree.Core.Monad
-import Teafree.Interaction.Notify
-import Teafree.Interaction.Choice
+data Format = Format
 
-default (T.Text)
+class ToDoc a where
+    toDoc :: Format -> a -> Text
 
-{- Prepare a tea -}
-prepare :: Teafree ()
-prepare = shellyNoDir $ silently $ print_stdout False $ do
-    choice <- chooseTea
-    teaTime <- return $ 2
-    liftIO . threadDelay . (*1000000) $ teaTime
-    send $ notification 0 "The tea is ready" choice
+toString :: (ToDoc a) => a -> Text
+toString = toDoc noFormat
+
+toTerminal :: (ToDoc a) => a -> Text
+toTerminal = toDoc termFormat
+
+noFormat = Format
+termFormat = Format
+

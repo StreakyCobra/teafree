@@ -30,10 +30,12 @@ import Teafree.Core.Monad
 import Teafree.Core.TeafreeError
 import Teafree.Core.Version
 import qualified Teafree.Command.List as CL
+import qualified Teafree.Command.Info as CI
 import qualified Teafree.Command.Prepare as CP
 
 {- Teafree available modes -}
 data TeafreeMode = List {what :: String}
+                 | Info
                  | Prepare
         deriving ( Data, Typeable, Show, Eq)
 
@@ -42,17 +44,22 @@ list :: TeafreeMode
 list = List {what = def &= opt "teas" &= typ "WHAT" &= argPos 0}
     &= help "List items, where 'WHAT' is either 'teas' or 'categories'"
 
+{- Mode to get informations about a tea -}
+info :: TeafreeMode
+info = Info
+    &= help "Ask to chose a tea and give info about it."
+
 {- Mode to prepare a tea -}
 prepare :: TeafreeMode
 prepare = Prepare
-    &= help "Ask the user for a tea and time it."
+    &= help "Ask to chose a tea and time it."
 
 {- One mode to rule them all,
    One mode to find them,
    One mode to bring them all
    and in the darkness bind them -}
 teafree :: Mode (CmdArgs TeafreeMode)
-teafree = cmdArgsMode $ modes [list, prepare]
+teafree = cmdArgsMode $ modes [list, info, prepare]
     &= program "teafree"
     &= summary "A Haskell utility for tea addicts"
     &= helpArg [explicit, name "help", name "h"]
@@ -61,6 +68,7 @@ teafree = cmdArgsMode $ modes [list, prepare]
 {- Run a specific mode -}
 runMode :: TeafreeMode -> Teafree ()
 runMode (List w) = CL.printList w
+runMode Info = CI.info
 runMode Prepare = CP.prepare
 
 {- Entry point of the application, in case of you don't already know -}

@@ -20,24 +20,21 @@
 
 -}
 
-module Teafree.Command.Prepare
-    ( prepare
-    ) where
+module Teafree.Interaction.Choice where
 
-import Control.Concurrent
+import Control.Monad
+import Control.Exception
 import Data.Text as T
 import Shelly
 
-import Teafree.Core.Monad
-import Teafree.Interaction.Notify
-import Teafree.Interaction.Choice
-
 default (T.Text)
 
-{- Prepare a tea -}
-prepare :: Teafree ()
-prepare = shellyNoDir $ silently $ print_stdout False $ do
-    choice <- chooseTea
-    teaTime <- return $ 2
-    liftIO . threadDelay . (*1000000) $ teaTime
-    send $ notification 0 "The tea is ready" choice
+chooseTea :: Sh Text
+chooseTea = listOfTeas -|- chooser
+    where listOfTeas :: Sh Text
+          listOfTeas = liftM T.unlines $ lsT "."
+
+chooser :: Sh Text
+chooser = catch_sh
+            (run "dmenu" ["-i", "-p", "Tea:", "-l", "10"])
+            ((\_ -> return "") :: SomeException -> Sh Text)

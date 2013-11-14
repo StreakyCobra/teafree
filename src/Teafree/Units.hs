@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,24 +18,13 @@
 
 -}
 
-module Teafree.Command.Prepare
-    ( prepare
-    ) where
+module Teafree.Units where
 
-import Control.Concurrent
-import Data.Text as T
-import Shelly
+type Temperature = Int
 
-import Teafree.Core.Monad
-import Teafree.Interaction.Notify
-import Teafree.Interaction.Choice
+type Quantity = Double
 
-default (T.Text)
+type Time = Int
 
-{- Prepare a tea -}
-prepare :: Teafree ()
-prepare = shellyNoDir $ silently $ print_stdout False $ do
-    choice <- chooseTea
-    teaTime <- return $ 2
-    liftIO . threadDelay . (*1000000) $ teaTime
-    send $ notification 0 "The tea is ready" choice
+type Percentage = Double
+
