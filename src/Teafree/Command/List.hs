@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -24,10 +22,15 @@ module Teafree.Command.List
     ( printList
     ) where
 
-import qualified Data.Text.Lazy as T
-import qualified Data.Text.Lazy.IO as TIO
+import Data.Label
+
+import Teafree.Core.Monad
+import Teafree.Core.Environment
 
 {- Print the list of teas -}
-printList :: IO ()
-printList = do
-    TIO.putStrLn "White\nGreen\nBlack"
+printList :: String -> Teafree ()
+printList "teas" = do
+    content <- ask
+    liftIO $ putStrLn "White\nGreen\nBlack"
+    liftIO $ putStrLn . get testA $ content
+printList w = failure $ "There is no list of \"" ++ w ++ "\""

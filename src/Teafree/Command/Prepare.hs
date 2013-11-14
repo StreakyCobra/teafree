@@ -24,15 +24,18 @@ module Teafree.Command.Prepare
     ( prepare
     ) where
 
-import Shelly
 import Control.Monad
 import Control.Concurrent
 import Control.Exception
 import Data.Text as T
+import Shelly
+
+import Teafree.Core.Monad
+
 default (T.Text)
 
 {- Prepare a tea -}
-prepare :: IO ()
+prepare :: Teafree ()
 prepare = shellyNoDir $ silently $ print_stdout False $ do
     choice <- chooseTea
     teaTime <- return $ 2

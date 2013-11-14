@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TemplateHaskell, TypeOperators #-}
 
 {-
 
@@ -20,27 +20,20 @@
 
 -}
 
-module Teafree.Core.Monad
-    ( Teafree
-    , runTeafree
-    , liftIO
-    , ask
-    , failure
-    , return
-    ) where
+module Teafree.Core.Environment where
 
-import Control.Monad.Reader
-import Control.Monad.Error
+import Data.Label
 
-import Teafree.Core.Environment
-import Teafree.Core.TeafreeError
+data Environment = Environment
+    { _testA     :: String
+    , _testB     :: String
+    } deriving (Show)
 
-newtype Teafree t = T {runT :: ErrorT TeafreeError (ReaderT Environment IO) t}
-    deriving (Monad, MonadError TeafreeError, MonadReader Environment,
-             MonadIO)
+mkLabel ''Environment
 
-runTeafree :: Teafree t -> Environment -> IO (Either TeafreeError t)
-runTeafree t = runReaderT $ runErrorT (runT t)
+defaultEnvironment :: Environment
+defaultEnvironment = Environment
+    { _testA = "FabA"
+    , _testB = "FabB"
+    }
 
-failure :: String -> Teafree t
-failure = throwError . strMsg

@@ -23,37 +23,53 @@
 module Main where
 
 import System.Console.CmdArgs
+import System.Exit (exitSuccess, exitFailure)
 
-import qualified Teafree.Core.Version as V
+import Teafree.Core.Environment
+import Teafree.Core.Monad
+import Teafree.Core.TeafreeError
+import Teafree.Core.Version
 import qualified Teafree.Command.List as CL
 import qualified Teafree.Command.Prepare as CP
 
 {- Teafree available modes -}
-data TeafreeMode = List
+data TeafreeMode = List {what :: String}
                  | Prepare
         deriving ( Data, Typeable, Show, Eq)
 
-{- Teas mode -}
+{- Mode to list items -}
 list :: TeafreeMode
-list = List
+list = List {what = def &= opt "teas" &= typ "WHAT" &= argPos 0}
+    &= help "List items, where 'WHAT' is either 'teas' or 'categories'"
 
-{- Prepare mode -}
+{- Mode to prepare a tea -}
 prepare :: TeafreeMode
 prepare = Prepare
+    &= help "Ask the user for a tea and time it."
 
-{- Teafree mode -}
-mode :: Mode (CmdArgs TeafreeMode)
-mode = cmdArgsMode $ modes [list, prepare]
+{- One mode to rule them all,
+   One mode to find them,
+   One mode to bring them all
+   and in the darkness bind them -}
+teafree :: Mode (CmdArgs TeafreeMode)
+teafree = cmdArgsMode $ modes [list, prepare]
     &= program "teafree"
     &= summary "A Haskell utility for tea addicts"
     &= helpArg [explicit, name "help", name "h"]
-    &= versionArg [explicit, name "version", name "v", summary V.release]
-
-{- Entry point -}
-main :: IO ()
-main = cmdArgsRun mode >>= runMode
+    &= versionArg [explicit, name "version", name "v", summary release]
 
 {- Run a specific mode -}
-runMode :: TeafreeMode -> IO ()
-runMode List = CL.printList
+runMode :: TeafreeMode -> Teafree ()
+runMode (List w) = CL.printList w
 runMode Prepare = CP.prepare
+
+{- Entry point of the application, in case of you don't already know -}
+main :: IO ()
+main = do
+    m <- cmdArgsRun teafree
+    runTeafree (runMode m) defaultEnvironment >>= end
+
+{- End the program properly, by verifying error messages -}
+end :: Either TeafreeError () -> IO ()
+end (Left e) = putStrLn (getErrorMsg e) >> exitFailure
+end (Right _) = exitSuccess
