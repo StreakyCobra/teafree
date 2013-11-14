@@ -24,16 +24,19 @@ module Teafree.Core.Environment where
 
 import Data.Label
 
+import Teafree.Tea
+import Teafree.Category
+
 data Environment = Environment
-    { _testA     :: String
-    , _testB     :: String
+    { _teas       :: [Tea]
+    , _categories :: [Category]
     } deriving (Show)
 
 mkLabel ''Environment
 
 defaultEnvironment :: Environment
 defaultEnvironment = Environment
-    { _testA = "FabA"
-    , _testB = "FabB"
+    { _teas = []
+    , _categories = []
     }
 
