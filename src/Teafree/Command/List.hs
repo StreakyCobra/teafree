@@ -22,10 +22,7 @@ module Teafree.Command.List
     ( printList
     ) where
 
-import Data.Label
-
 import Teafree.Core.Monad
-import Teafree.Core.Environment
 
 {- Print the list of teas -}
 printList :: String -> Teafree ()

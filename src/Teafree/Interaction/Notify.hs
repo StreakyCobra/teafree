@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell, TypeOperators, OverloadedStrings #-}
 
 {-
 
@@ -21,51 +21,67 @@
 -}
 
 module Teafree.Interaction.Notify
-    ( notification
-    , addIcon
-    , addUrgency
-    , send
+    ( send
+    , notification
+    , def
+    , duration
+    , title
+    , body
+    , icon
+    , urgency
+    , category
     ) where
 
+import Data.Label
 import Data.Text as T
-import Shelly
+import Shelly hiding (get)
 
 default (T.Text)
 
 data Notification = N
-    { duration :: Int
-    , title    :: Text
-    , body     :: Text
-    , icon     :: Maybe Text
-    , urgency  :: Maybe Text
+    { _duration :: Maybe Int
+    , _title    :: Maybe Text
+    , _body     :: Maybe Text
+    , _icon     :: Maybe Text
+    , _urgency  :: Maybe Text
+    , _category :: Maybe Text
     }
 
-notification :: Int -> Text -> Text -> Notification
-notification t h b = N
-    { duration = t
-    , title    = h
-    , body     = b
-    , icon     = Nothing
-    , urgency  = Nothing
+mkLabel ''Notification
+
+notification :: Notification
+notification = N
+    { _duration = Nothing
+    , _title    = Nothing
+    , _body     = Nothing
+    , _icon     = Nothing
+    , _urgency  = Nothing
+    , _category = Nothing
     }
 
-addIcon :: Text -> Notification -> Notification
-addIcon i n = n { icon = Just i }
-
-addUrgency :: Text -> Notification -> Notification
-addUrgency u n = n { urgency = Just u }
+def :: (f :-> Maybe a) -> a -> f -> f
+def f v = set f $ Just v
 
 send :: Notification -> Sh ()
-send n = notifySend $ d ++ u ++ i ++ t ++ b
-    where d = ["-t", T.pack . show . (* 1000) . duration $ n]
-          t = [title n]
-          b = [body n]
-          i = case icon n of
+send n = notifySend . Prelude.concat $ [d, c, u, i, t, b]
+    where d = case get duration n of
+                  Nothing -> []
+                  Just v -> ["-t", T.pack . show . (* 1000) $ v]
+          t = case get title n of
+                  Nothing -> [""]
+                  Just v -> [v]
+          b = case get body  n of
+                  Nothing -> [""]
+                  Just v -> [v]
+          i = case get icon n of
                   Nothing -> []
                   Just v -> ["-i", v]
-          u = case urgency n of
+          u = case get urgency n of
                   Nothing -> []
                   Just v -> ["-u", v]
+          c = case get category n of
+                  Nothing -> []
+                  Just v -> ["-c", v]
 
 notifySend :: [Text] -> Sh ()
 notifySend = run_ "notify-send"

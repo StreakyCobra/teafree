@@ -40,4 +40,4 @@ prepare = shellyNoDir $ silently $ print_stdout False $ do
     choice <- chooseTea
     teaTime <- return $ 2
     liftIO . threadDelay . (*1000000) $ teaTime
-    send $ notification 0 "The tea is ready" choice
+    send $ def body "Salut" . def title choice $ notification
