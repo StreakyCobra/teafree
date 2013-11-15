@@ -38,26 +38,19 @@ import Shelly hiding (get)
 
 default (T.Text)
 
-data Notification = N
-    { _duration :: Maybe Int
-    , _title    :: Maybe Text
-    , _body     :: Maybe Text
-    , _icon     :: Maybe Text
-    , _urgency  :: Maybe Text
-    , _category :: Maybe Text
-    }
-
-mkLabel ''Notification
+fclabels [d|
+    data Notification = N
+        { duration :: Maybe Int
+        , title    :: Maybe Text
+        , body     :: Maybe Text
+        , icon     :: Maybe Text
+        , urgency  :: Maybe Text
+        , category :: Maybe Text
+        }
+    |]
 
 notification :: Notification
-notification = N
-    { _duration = Nothing
-    , _title    = Nothing
-    , _body     = Nothing
-    , _icon     = Nothing
-    , _urgency  = Nothing
-    , _category = Nothing
-    }
+notification = N Nothing Nothing Nothing Nothing Nothing Nothing
 
 def :: (f :-> Maybe a) -> a -> f -> f
 def f v = set f $ Just v
