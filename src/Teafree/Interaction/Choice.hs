@@ -20,7 +20,10 @@
 
 -}
 
-module Teafree.Interaction.Choice where
+module Teafree.Interaction.Choice
+    ( chooseTea
+    , chooser
+    ) where
 
 import Control.Monad
 import Control.Exception

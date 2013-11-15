@@ -37,4 +37,4 @@ default (T.Text)
 info :: Teafree ()
 info = shellyNoDir $ silently $ print_stdout False $ do
     choice <- chooseTea
-    send $ notification 5 "Information" choice
+    send $ def body choice . def title "Information" $ notification
