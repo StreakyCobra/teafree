@@ -34,9 +34,11 @@ data Environment = Environment
 
 mkLabel ''Environment
 
+getEnvironment :: IO Environment
+getEnvironment = return defaultEnvironment
+
 defaultEnvironment :: Environment
 defaultEnvironment = Environment
     { _teas = []
     , _categories = []
     }
-
