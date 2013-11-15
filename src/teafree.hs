@@ -75,7 +75,8 @@ runMode Prepare = CP.prepare
 main :: IO ()
 main = do
     m <- cmdArgsRun teafree
-    runTeafree (runMode m) defaultEnvironment >>= end
+    e <- getEnvironment
+    runTeafree (runMode m) e >>= end
 
 {- End the program properly, by verifying error messages -}
 end :: Either TeafreeError () -> IO ()
