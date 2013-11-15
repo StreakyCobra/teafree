@@ -23,9 +23,11 @@ module Teafree.Command.List
     ) where
 
 import Teafree.Core.Monad
+import Teafree.Core.Environment
 
 {- Print the list of teas -}
 printList :: String -> Teafree ()
 printList "teas" = do
-    liftIO $ putStrLn "White\nGreen\nBlack"
+    content <- ask
+    liftIO $ putStrLn . unlines . map show $ get teas content
 printList w = failure $ "There is no list of \"" ++ w ++ "\""

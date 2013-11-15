@@ -20,25 +20,30 @@
 
 -}
 
-module Teafree.Core.Environment where
+module Teafree.Core.Environment
+    ( Environment
+    , getEnvironment
+    , get
+    , set
+    , modify
+    , teas
+    , families
+    ) where
 
 import Data.Label
 
 import Teafree.Tea
 import Teafree.Family
 
-data Environment = Environment
-    { _teas       :: [Tea]
-    , _families   :: [Family]
-    } deriving (Show)
-
-mkLabel ''Environment
+fclabels [d|
+    data Environment = Environment
+        { teas       :: [Tea]
+        , families   :: [Family]
+        } deriving (Show)
+    |]
 
 getEnvironment :: IO Environment
 getEnvironment = return defaultEnvironment
 
 defaultEnvironment :: Environment
-defaultEnvironment = Environment
-    { _teas = []
-    , _families = []
-    }
+defaultEnvironment = Environment [] []

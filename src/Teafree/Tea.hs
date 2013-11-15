@@ -23,23 +23,18 @@
 module Teafree.Tea where
 
 import Data.Label
-import Text.Printf
 
 import Teafree.Family
-import Teafree.Interaction.Format
 import Teafree.Units
 
-data Tea = Tea
-    { _name        :: String
-    , _family      :: Family
-    , _quantity    :: Quantity
-    , _temperature :: Temperature
-    , _time        :: Time
-    , _cafeine     :: Percentage
-    } deriving (Show)
-
-mkLabel ''Tea
-
-instance ToDoc Tea where
-    toDoc f t = "Tea {"
+fclabels [d|
+    data Tea = Tea
+        { _name        :: String
+        , _family      :: Family
+        , _quantity    :: Quantity
+        , _temperature :: Temperature
+        , _time        :: Time
+        , _cafeine     :: Percentage
+        } deriving (Show)
+    |]
 

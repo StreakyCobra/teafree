@@ -24,9 +24,10 @@ module Teafree.Family where
 
 import Data.Label
 
-data Family = Family
-    { _name       :: String
-    , _icon       :: String
-    } deriving (Show)
+fclabels [d|
+    data Family = Family
+        { _name       :: String
+        , _icon       :: String
+        } deriving (Show)
+    |]
 
-mkLabel ''Family
