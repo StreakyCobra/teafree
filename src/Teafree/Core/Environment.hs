@@ -25,11 +25,11 @@ module Teafree.Core.Environment where
 import Data.Label
 
 import Teafree.Tea
-import Teafree.Category
+import Teafree.Family
 
 data Environment = Environment
     { _teas       :: [Tea]
-    , _categories :: [Category]
+    , _families   :: [Family]
     } deriving (Show)
 
 mkLabel ''Environment
@@ -40,5 +40,5 @@ getEnvironment = return defaultEnvironment
 defaultEnvironment :: Environment
 defaultEnvironment = Environment
     { _teas = []
-    , _categories = []
+    , _families = []
     }

@@ -20,13 +20,13 @@
 
 -}
 
-module Teafree.Category where
+module Teafree.Family where
 
 import Data.Label
 
-data Category = Category
+data Family = Family
     { _name       :: String
     , _icon       :: String
     } deriving (Show)
 
-mkLabel ''Category
+mkLabel ''Family
