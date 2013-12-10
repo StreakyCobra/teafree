@@ -24,10 +24,16 @@ module Teafree.Family where
 
 import Data.Label
 
+import Teafree.Units
+
 fclabels [d|
     data Family = Family
-        { _name       :: String
-        , _icon       :: String
+        { name        :: String
+        , icon        :: String
+        , quantity    :: Quantity
+        , temperature :: Temperature
+        , time        :: Time
+        , cafeine     :: Percentage
         } deriving (Show)
     |]
 

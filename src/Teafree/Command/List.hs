@@ -30,4 +30,7 @@ printList :: String -> Teafree ()
 printList "teas" = do
     content <- ask
     liftIO $ putStrLn . unlines . map show $ get teas content
+printList "families" = do
+    content <- ask
+    liftIO $ putStrLn . unlines . map show $ get families content
 printList w = failure $ "There is no list of \"" ++ w ++ "\""
