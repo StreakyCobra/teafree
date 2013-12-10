@@ -20,11 +20,36 @@
 
 module Teafree.Units where
 
-type Temperature = Int
+import Text.PrettyPrint.ANSI.Leijen
 
-type Quantity = Double
+data Temperature = Celsius Int
+                 | Fahrenheit Int
 
-type Time = Int
+newtype Quantity = Tsp Double
 
-type Percentage = Double
+newtype Time = Second Int
 
+newtype Percentage = Percent Int
+
+instance Show Temperature where
+    show (Celsius v) = show $
+                (dullblue . text . show $ v) <>
+                (text "°C")
+    show (Fahrenheit v) = show $
+                (dullblue . text . show $ v) <>
+                (text "°F")
+
+instance Show Quantity where
+    show (Tsp v) = show $
+                (dullblue . text . show $ v) <+>
+                (text "tsp.")
+
+instance Show Time where
+    show (Second v) = show $
+                (dullblue . text . show $ v) <+>
+                (text "s.")
+
+instance Show Percentage where
+    show (Percent v) = show $
+                (dullblue . text . show $ v) <>
+                (text "%")

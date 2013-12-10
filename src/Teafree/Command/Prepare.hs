@@ -43,4 +43,8 @@ prepare = shellyNoDir $ silently $ print_stdout False $ do
     testIcon <- liftIO $ getDataFileName "images/oolang.png"
     liftIO . threadDelay . (*1000000) $ teaTime
     echo $ T.pack testIcon
-    send $ def body "Salut" . def title choice . def icon (T.pack testIcon) $ notification
+    send $ def title "Your tea is ready"
+         . def body choice
+         . def icon (T.pack testIcon)
+         . def duration 0
+         $ notification

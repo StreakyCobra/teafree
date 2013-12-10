@@ -35,11 +35,14 @@ import Data.Label
 import Paths_teafree
 import Teafree.Tea
 import Teafree.Family
+import Teafree.Units
 
 fclabels [d|
     data Environment = Environment
-        { teas       :: [Tea]
-        , families   :: [Family]
+        { teas         :: [Tea]
+        , families     :: [Family]
+        , inFahreneit  :: Bool
+        , inFlOz       :: Bool
         } deriving (Show)
     |]
 
@@ -47,11 +50,11 @@ getEnvironment :: IO Environment
 getEnvironment = do
     icon <- getDataFileName "images/mate.png"
     icon2 <- getDataFileName "images/oolang.png"
-    let afam = [Family "Mate" icon 2 100 1 20, Family "Oolang" icon2 1 95 2 19]
+    let afam = [Family "Mate" icon (Tsp 2) (Celsius 100) (Second 1) Nothing, Family "Oolang" icon2 (Tsp 1) (Fahrenheit 95) (Second 2) (Just $ Percent 19)]
     let env = set families afam $ defaultEnvironment
     return env
     where
 
 
 defaultEnvironment :: Environment
-defaultEnvironment = Environment [] []
+defaultEnvironment = Environment [] [] False False

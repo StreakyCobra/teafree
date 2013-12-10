@@ -23,6 +23,8 @@
 module Teafree.Family where
 
 import Data.Label
+import Text.Printf
+import Text.PrettyPrint.ANSI.Leijen
 
 import Teafree.Units
 
@@ -33,7 +35,20 @@ fclabels [d|
         , quantity    :: Quantity
         , temperature :: Temperature
         , time        :: Time
-        , cafeine     :: Percentage
-        } deriving (Show)
+        , cafeine     :: Maybe Percentage
+        }
     |]
 
+instance Show Family where
+    show t = show $
+                (bold . dullred $ (text . get name $ t)) <$>
+                indent 4 (
+                    text (printf "%-15s" "Quantity:") <+> text (show $ get quantity t) <$>
+                    text (printf "%-15s" "Temperature:") <+> text (show $ get temperature t) <$>
+                    text (printf "%-15s" "Time:") <+> text (show $ get time t) <$>
+                    text (printf "%-15s" "Cafeine:") <+>
+                        case (get cafeine t) of
+                            Just v ->  text (show v) <+> text "of a coffee"
+                            Nothing ->  yellow (text "Unknown")
+                    ) <$>
+                    empty
