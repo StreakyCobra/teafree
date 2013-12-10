@@ -52,3 +52,6 @@ instance Show Family where
                             Nothing ->  yellow (text "Unknown")
                     ) <$>
                     empty
+
+summary :: Family -> String
+summary f = (printf "%s" (get name f))

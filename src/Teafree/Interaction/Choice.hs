@@ -22,20 +22,39 @@
 
 module Teafree.Interaction.Choice
     ( chooseTea
+    , chooseFamily
     , chooser
     ) where
 
+import Teafree.Core.Monad
+import Teafree.Core.Environment as E
+import Teafree.Family
+
+import Prelude as P
 import Control.Monad
-import Control.Exception
 import Data.Text as T
 import Shelly
 
+import Control.Exception
 default (T.Text)
 
 chooseTea :: Sh Text
 chooseTea = listOfTeas -|- chooser
     where listOfTeas :: Sh Text
           listOfTeas = liftM T.unlines $ lsT "."
+
+chooseFamily :: Teafree Text
+chooseFamily = do
+        env <- ask
+        let listOfFamilies = T.unlines . P.map (T.pack . summary) $ E.get families env
+        choice <- shelly $ return listOfFamilies -|- chooser
+        return choice
+        {-
+        env <- ask
+        let listOfFamilies = T.unlines . P.map (T.pack . summary) $ E.get families env
+        choice <- shelly $ return listOfFamilies -|- chooser
+        return choice
+        -}
 
 chooser :: Sh Text
 chooser = catch_sh

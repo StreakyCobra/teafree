@@ -24,17 +24,20 @@ module Teafree.Command.Info
     ( info
     ) where
 
-import Data.Text as T
-import Shelly
 
 import Teafree.Core.Monad
 import Teafree.Interaction.Notify
 import Teafree.Interaction.Choice
 
+import Shelly
+import Control.Monad
+import Data.Text as T
+
 default (T.Text)
 
 {- Prepare a tea -}
 info :: Teafree ()
-info = shellyNoDir $ silently $ print_stdout False $ do
-    choice <- chooseTea
-    send $ def body choice . def title "Information" $ notification
+info = do
+    choice <- chooseFamily
+    shellyNoDir $ silently $ print_stdout False $ do
+        send $ def body choice . def title "Information" $ notification
