@@ -28,6 +28,7 @@ import Control.Concurrent
 import Data.Text as T
 import Shelly
 
+import Paths_teafree
 import Teafree.Core.Monad
 import Teafree.Interaction.Notify
 import Teafree.Interaction.Choice
@@ -39,5 +40,7 @@ prepare :: Teafree ()
 prepare = shellyNoDir $ silently $ print_stdout False $ do
     choice <- chooseTea
     teaTime <- return $ 2
+    testIcon <- liftIO $ getDataFileName "images/oolang.png"
     liftIO . threadDelay . (*1000000) $ teaTime
-    send $ def body "Salut" . def title choice $ notification
+    echo $ T.pack testIcon
+    send $ def body "Salut" . def title choice . def icon (T.pack testIcon) $ notification

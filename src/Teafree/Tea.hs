@@ -29,12 +29,12 @@ import Teafree.Units
 
 fclabels [d|
     data Tea = Tea
-        { _name        :: String
-        , _family      :: Family
-        , _quantity    :: Quantity
-        , _temperature :: Temperature
-        , _time        :: Time
-        , _cafeine     :: Percentage
+        { name        :: String
+        , family      :: Family
+        , quantity    :: Quantity
+        , temperature :: Temperature
+        , time        :: Time
+        , cafeine     :: Percentage
         } deriving (Show)
     |]
 

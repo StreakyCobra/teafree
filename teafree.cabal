@@ -12,6 +12,7 @@ maintainer:          fabien.dubosson@gmail.com
 copyright:           2013 Fabien Dubosson
 build-type:          Simple
 extra-source-files:  README.md
+data-files:          images/*.png
 cabal-version:       >=1.10
 
 source-repository head
