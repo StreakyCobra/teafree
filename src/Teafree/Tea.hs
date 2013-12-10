@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, TypeOperators, OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell, TypeOperators #-}
 
 {-
 
@@ -23,18 +23,30 @@
 module Teafree.Tea where
 
 import Data.Label
+import Text.Printf
+import Text.PrettyPrint.ANSI.Leijen
 
-import Teafree.Family
+import qualified Teafree.Family as F
 import Teafree.Units
 
 fclabels [d|
     data Tea = Tea
         { name        :: String
-        , family      :: Family
-        , quantity    :: Quantity
-        , temperature :: Temperature
-        , time        :: Time
-        , cafeine     :: Percentage
-        } deriving (Show)
+        , family      :: F.Family
+        , quantity    :: Maybe Quantity
+        , temperature :: Maybe Temperature
+        , time        :: Maybe Time
+        , cafeine     :: Maybe Percentage
+        }
     |]
 
+instance Show Tea where
+    show t = show $
+                (bold . dullred $ (text . get name $ t)) <$>
+                indent 4 (
+                    text (printf "%-15s" "Quantity:") <+> text (show $ get quantity t) <$>
+                    text (printf "%-15s" "Temperature:") <+> text (show $ get temperature t) <$>
+                    text (printf "%-15s" "Time:") <+> text (show $ get time t) <$>
+                    text (printf "%-15s" "Cafeine:") <+> text (show $ get cafeine t) <+> text "of a coffee"
+                    ) <$>
+                    empty

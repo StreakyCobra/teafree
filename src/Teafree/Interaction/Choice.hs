@@ -39,5 +39,5 @@ chooseTea = listOfTeas -|- chooser
 
 chooser :: Sh Text
 chooser = catch_sh
-            (run "dmenu" ["-i", "-p", "Tea:", "-l", "10"])
+            (run "dmenu" ["-i", "-p", "teafree:", "-l", "10"])
             ((\_ -> return "") :: SomeException -> Sh Text)
