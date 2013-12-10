@@ -33,16 +33,14 @@ module Teafree.Core.Environment
 import Data.Label
 
 import Paths_teafree
-import Teafree.Tea
-import Teafree.Family
+import Teafree.Tea as T
+import Teafree.Family as F
 import Teafree.Units
 
 fclabels [d|
     data Environment = Environment
         { teas         :: [Tea]
         , families     :: [Family]
-        , inFahreneit  :: Bool
-        , inFlOz       :: Bool
         } deriving (Show)
     |]
 
@@ -50,11 +48,11 @@ getEnvironment :: IO Environment
 getEnvironment = do
     icon <- getDataFileName "images/mate.png"
     icon2 <- getDataFileName "images/oolang.png"
-    let afam = [Family "Mate" icon (Tsp 2) (Celsius 100) (Second 1) Nothing, Family "Oolang" icon2 (Tsp 1) (Fahrenheit 95) (Second 2) (Just $ Percent 19)]
+    icon3 <- getDataFileName "images/herbal.png"
+    let afam = [Family "Mate" icon (Tsp 2) (Celsius 100) (Second 1) Nothing, Family "Oolang" icon2 (Tsp 1) (Fahrenheit 95) (Second 2) (Just $ Percent 19), Family "Herbal" icon3 (Tsp 4) (Celsius 50) (Second 90) (Just Free)]
     let env = set families afam $ defaultEnvironment
     return env
-    where
-
 
 defaultEnvironment :: Environment
-defaultEnvironment = Environment [] [] False False
+defaultEnvironment = Environment [] []
+

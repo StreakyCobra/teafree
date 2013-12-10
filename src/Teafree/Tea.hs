@@ -26,8 +26,9 @@ import Data.Label
 import Text.Printf
 import Text.PrettyPrint.ANSI.Leijen
 
-import qualified Teafree.Family as F
+import Teafree.Core.PPrint
 import Teafree.Units
+import qualified Teafree.Family as F
 
 fclabels [d|
     data Tea = Tea
@@ -41,12 +42,30 @@ fclabels [d|
     |]
 
 instance Show Tea where
-    show t = show $
-                (bold . dullred $ (text . get name $ t)) <$>
-                indent 4 (
-                    text (printf "%-15s" "Quantity:") <+> text (show $ get quantity t) <$>
-                    text (printf "%-15s" "Temperature:") <+> text (show $ get temperature t) <$>
-                    text (printf "%-15s" "Time:") <+> text (show $ get time t) <$>
-                    text (printf "%-15s" "Cafeine:") <+> text (show $ get cafeine t) <+> text "of a coffee"
-                    ) <$>
-                    empty
+    show = show . pprint False
+
+instance PPrint Tea where
+    ppName c v = i (bold . dullred) $ text . get name $ v
+            where i f = if c then f else id
+
+    ppDetails c t = text (printf "%-15s" "Quantity:") <+> (pprint c $ get quantity t) <$>
+                    text (printf "%-15s" "Temperature:") <+> (pprint c $ get temperature t) <$>
+                    text (printf "%-15s" "Time:") <+> (pprint c $ get time t) <$>
+                    text (printf "%-15s" "Cafeine:") <+>
+                        case (get cafeine t) of
+                            Just Free -> i dullblue $ text "Cafeine free"
+                            Just v -> pprint c v <+> text "of a coffee"
+                            Nothing -> i yellow $ text "Unknown"
+            where i f = if c then f else id
+
+    ppSummary c v = text (get name v) <+> text " (" <>
+                    (pprint c $ get quantity v) <> text " | " <>
+                    (pprint c $ get temperature v) <> text " | " <>
+                    (pprint c $ get time v) <>
+                    (case (get cafeine v) of
+                        Just Free -> text " | " <> (i yellow $ text "Cafeine free")
+                        Just t -> text " | " <> pprint c t <+> text "of a coffee"
+                        Nothing -> text "") <>
+                    text ")"
+            where i f = if c then f else id
+

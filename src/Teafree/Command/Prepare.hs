@@ -26,25 +26,32 @@ module Teafree.Command.Prepare
 
 import Control.Concurrent
 import Data.Text as T
-import Shelly
+import Shelly hiding (get)
 
 import Paths_teafree
+import Teafree.Core.Environment
 import Teafree.Core.Monad
-import Teafree.Interaction.Notify
+import Teafree.Core.PPrint
+import Teafree.Interaction.Notify as N
 import Teafree.Interaction.Choice
+import Teafree.Family as F
+import Teafree.Units as F
 
 default (T.Text)
 
 {- Prepare a tea -}
 prepare :: Teafree ()
-prepare = shellyNoDir $ silently $ print_stdout False $ do
-    choice <- chooseTea
-    teaTime <- return $ 2
-    testIcon <- liftIO $ getDataFileName "images/oolang.png"
-    liftIO . threadDelay . (*1000000) $ teaTime
-    echo $ T.pack testIcon
-    send $ def title "Your tea is ready"
-         . def body choice
-         . def icon (T.pack testIcon)
-         . def duration 0
-         $ notification
+prepare = do
+    choice <- chooseFamily
+
+    case choice of
+        Nothing -> sendError "The selected item is not found"
+        Just f -> do
+            liftIO . threadDelay . (*1000000) . toSeconds $ get F.time f
+            send $ def title (T.pack . show . ppName False $ f)
+                 . def body (T.pack "Your tea is ready")
+                 . def N.icon (T.pack $ get F.icon f)
+                 . def duration 0
+                 . def urgency (T.pack "critical")
+                 $ notification
+

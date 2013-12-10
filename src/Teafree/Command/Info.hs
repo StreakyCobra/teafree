@@ -24,17 +24,34 @@ module Teafree.Command.Info
     ( info
     ) where
 
-import Data.Text as T
-import Shelly
 
+import Prelude as P
+import Shelly hiding (get)
+import Data.Text as T
+import Data.List as DL
+
+import Paths_teafree
+import Teafree.Core.PPrint
+import Teafree.Core.Environment
 import Teafree.Core.Monad
-import Teafree.Interaction.Notify
+import Teafree.Interaction.Notify as N
 import Teafree.Interaction.Choice
+import Teafree.Family as F
 
 default (T.Text)
 
 {- Prepare a tea -}
 info :: Teafree ()
-info = shellyNoDir $ silently $ print_stdout False $ do
-    choice <- chooseTea
-    send $ def body choice . def title "Information" $ notification
+info = do
+    choice <- chooseFamily
+
+    case choice of
+        Nothing -> sendError "The selected item is not found"
+        Just f -> send $ def title (T.pack . show . ppName False $ f)
+                      . def body (T.pack . show . ppDetails False $ f)
+                      . def N.icon (T.pack $ get F.icon f)
+                      . def duration 0
+                      . def urgency "normal"
+                      $ notification
+
+

@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, TypeOperators #-}
 
 {-
 
@@ -22,22 +22,50 @@
 
 module Teafree.Interaction.Choice
     ( chooseTea
-    , chooser
+    , chooseFamily
     ) where
 
-import Control.Monad
-import Control.Exception
-import Data.Text as T
-import Shelly
+import Teafree.Core.Monad
+import Teafree.Core.Environment
 
+import Teafree.Family as Fam
+import Teafree.Tea as Tea
+
+import Control.Exception
+import Control.Monad
+import Data.Label
+import Data.List as DL
+import Shelly hiding (get)
+import Data.Text as T hiding (map)
 default (T.Text)
 
-chooseTea :: Sh Text
-chooseTea = listOfTeas -|- chooser
-    where listOfTeas :: Sh Text
-          listOfTeas = liftM T.unlines $ lsT "."
+chooseTea :: Teafree (Maybe Tea)
+chooseTea = chooseItem teas (get Tea.name)
+
+chooseFamily :: Teafree (Maybe Family)
+chooseFamily = chooseItem families (get Fam.name)
+
+chooseItem :: (Environment :-> [a]) -> (a -> String) -> Teafree (Maybe a)
+chooseItem a f = do
+    env <- ask
+    choice <- chooseText . listToText f $ get a env
+    case choice of
+        "" -> return Nothing
+        _ -> forName a f $ DL.init . T.unpack $ choice
+
+chooseText :: Text -> Teafree Text
+chooseText t = shellyNoDir $ silently $ print_stdout False $ return t -|- chooser
 
 chooser :: Sh Text
 chooser = catch_sh
             (run "dmenu" ["-i", "-p", "teafree:", "-l", "10"])
             ((\_ -> return "") :: SomeException -> Sh Text)
+
+forName :: (Environment :-> [a]) -> (a -> String) -> String -> Teafree (Maybe a)
+forName a f s = do
+    env <- ask
+    return . DL.find ((==s) . f) $ get a env
+
+listToText :: (a -> String) -> [a] -> Text
+listToText f = T.unlines . map (T.pack . f)
+

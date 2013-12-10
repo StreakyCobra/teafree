@@ -18,38 +18,81 @@
 
 -}
 
-module Teafree.Units where
+module Teafree.Units
+    ( Temperature (..)
+    , Percentage (..)
+    , Quantity (..)
+    , Time (..)
+    , toSeconds
+    ) where
+
+import Teafree.Core.PPrint
 
 import Text.PrettyPrint.ANSI.Leijen
 
+
 data Temperature = Celsius Int
                  | Fahrenheit Int
+
+data Percentage = Percent Int
+                | Free
 
 newtype Quantity = Tsp Double
 
 newtype Time = Second Int
 
-newtype Percentage = Percent Int
 
 instance Show Temperature where
-    show (Celsius v) = show $
-                (dullblue . text . show $ v) <>
-                (text "°C")
-    show (Fahrenheit v) = show $
-                (dullblue . text . show $ v) <>
-                (text "°F")
+    show = show . pprint False
 
 instance Show Quantity where
-    show (Tsp v) = show $
-                (dullblue . text . show $ v) <+>
-                (text "tsp.")
+    show = show . pprint False
 
 instance Show Time where
-    show (Second v) = show $
-                (dullblue . text . show $ v) <+>
-                (text "s.")
+    show = show . pprint False
 
 instance Show Percentage where
-    show (Percent v) = show $
-                (dullblue . text . show $ v) <>
-                (text "%")
+    show = show . pprint False
+
+
+instance PPrint Temperature where
+    pprint c (Celsius v) = (i (bold . dullblue) . text . show $ v) <+> (text "°C")
+            where i f = if c then f else id
+
+    pprint c (Fahrenheit v) = (i (bold . dullblue) . text . show $ v) <+> (text "°F")
+            where i f = if c then f else id
+
+    ppName = pprint
+    ppDetails = pprint
+    ppSummary = pprint
+
+instance PPrint Quantity where
+    pprint c (Tsp v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp.")
+            where i f = if c then f else id
+
+    ppName = pprint
+    ppDetails = pprint
+    ppSummary = pprint
+
+instance PPrint Time where
+    pprint c (Second v) = (i (bold . dullblue) . text . show $ v) <+> (text "s.")
+            where i f = if c then f else id
+
+    ppName = pprint
+    ppDetails = pprint
+    ppSummary = pprint
+
+instance PPrint Percentage where
+    pprint c (Percent v) = (i (bold . dullblue) . text . show $ v) <+> (text "%")
+            where i f = if c then f else id
+
+    pprint c Free = i (bold . dullblue) $ text "Free"
+            where i f = if c then f else id
+
+    ppName = pprint
+    ppDetails = pprint
+    ppSummary = pprint
+
+toSeconds :: Time -> Int
+toSeconds (Second s) = s
+

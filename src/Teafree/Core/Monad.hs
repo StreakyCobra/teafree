@@ -44,3 +44,4 @@ runTeafree t = runReaderT $ runErrorT (runT t)
 
 failure :: String -> Teafree t
 failure = throwError . strMsg
+
