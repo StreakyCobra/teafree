@@ -31,7 +31,7 @@ import Control.Monad
 import Data.Text as T
 import Shelly
 
-import Teafree.Core.Classes
+import Teafree.Core.PPrint
 import Teafree.Core.Monad
 import Teafree.Core.Environment as E
 import Teafree.Family
@@ -60,5 +60,5 @@ chooser = catch_sh
             (run "dmenu" ["-i", "-p", "teafree:", "-l", "10"])
             ((\_ -> return "") :: SomeException -> Sh Text)
 
-toList :: (Summary a) => [a] -> Text
-toList = T.unlines . P.map (T.pack . summary)
+toList :: (PPrint a) => [a] -> Text
+toList = T.unlines . P.map (T.pack . show . ppSummary False)

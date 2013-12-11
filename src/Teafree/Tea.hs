@@ -26,7 +26,7 @@ import Data.Label
 import Text.Printf
 import Text.PrettyPrint.ANSI.Leijen
 
-import Teafree.Core.Classes
+import Teafree.Core.PPrint
 import qualified Teafree.Family as F
 import Teafree.Units
 
@@ -42,34 +42,28 @@ fclabels [d|
     |]
 
 instance Show Tea where
-    show t = show $
-                (bold . dullred $ (text . get name $ t)) <$>
-                indent 4 (
-                    text (printf "%-15s" "Quantity:") <+> text (show $ get quantity t) <$>
-                    text (printf "%-15s" "Temperature:") <+> text (show $ get temperature t) <$>
-                    text (printf "%-15s" "Time:") <+> text (show $ get time t) <$>
-                    text (printf "%-15s" "Cafeine:") <+> text (show $ get cafeine t) <+> text "of a coffee"
-                    ) <$>
-                    empty
+    show = show . pprint False
 
 instance PPrint Tea where
-    pprint t = show $
-                (bold . dullred $ (text . get name $ t)) <$>
-                indent 4 (
-                    text (printf "%-15s" "Quantity:") <+> text (pprint $ get quantity t) <$>
-                    text (printf "%-15s" "Temperature:") <+> text (pprint $ get temperature t) <$>
-                    text (printf "%-15s" "Time:") <+> text (pprint $ get time t) <$>
-                    text (printf "%-15s" "Cafeine:") <+> text (pprint $ get cafeine t) <+> text "of a coffee"
-                    ) <$>
-                    empty
+    ppName c v = i (bold . dullred) $ text . get name $ v
+            where i f = if c then f else id
 
-instance Summary Tea where
-    summary f = printf "%s (%s | %s | %s%s)"
-                    (get name f)
-                    (show $ get quantity f)
-                    (show $ get temperature f)
-                    (show $ get time f)
-                    (show $ case (get cafeine f) of
-                        Just (Percent v) -> text " | " <> text (show v) <+> text "of a coffee"
-                        Just Free -> text " | " <> text "Cafeine free"
-                        Nothing -> text "")
+    ppDetails c t = text (printf "%-15s" "Quantity:") <+> (pprint c $ get quantity t) <$>
+                    text (printf "%-15s" "Temperature:") <+> (pprint c $ get temperature t) <$>
+                    text (printf "%-15s" "Time:") <+> (pprint c $ get time t) <$>
+                    text (printf "%-15s" "Cafeine:") <+>
+                        case (get cafeine t) of
+                            Just Free -> i dullblue $ text "Cafeine free"
+                            Just v -> pprint c v <+> text "of a coffee"
+                            Nothing -> i yellow $ text "Unknown"
+            where i f = if c then f else id
+
+    ppSummary c f = text $ printf "%s (%s | %s | %s%s)"
+                            (get name f)
+                            (show $ get quantity f)
+                            (show $ get temperature f)
+                            (show $ get time f)
+                            (show $ case (get cafeine f) of
+                                Just (Percent v) -> text " | " <> text (show v) <+> text "of a coffee"
+                                Just Free -> text " | " <> text "Cafeine free"
+                                Nothing -> text "")

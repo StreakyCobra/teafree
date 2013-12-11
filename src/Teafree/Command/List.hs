@@ -22,7 +22,7 @@ module Teafree.Command.List
     ( printList
     ) where
 
-import Teafree.Core.Classes
+import Teafree.Core.PPrint
 import Teafree.Core.Monad
 import Teafree.Core.Environment
 import Teafree.Family
@@ -32,7 +32,9 @@ printList :: String -> Teafree ()
 printList "teas" = do
     content <- ask
     liftIO $ putStrLn . unlines . map show $ get teas content
+
 printList "families" = do
     content <- ask
-    liftIO $ putStrLn . unlines . map pprint $ get families content
+    liftIO $ putStrLn . unlines . map (show . pprint True) $ get families content
+
 printList w = failure $ "There is no list of \"" ++ w ++ "\""

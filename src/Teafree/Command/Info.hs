@@ -29,9 +29,10 @@ import Shelly hiding (get)
 import Data.Text as T
 
 import Paths_teafree
+import Teafree.Core.PPrint
 import Teafree.Core.Environment
 import Teafree.Core.Monad
-import Teafree.Interaction.Notify
+import Teafree.Interaction.Notify as N
 import Teafree.Interaction.Choice
 import qualified Teafree.Family as F
 
@@ -46,8 +47,8 @@ info = do
     let (_:f:_) = get families content
 
     shellyNoDir $ silently $ print_stdout False $ do
-        send $ def title choice
-             . def body (T.pack . show $ f)
-             . def icon (T.pack $ get F.icon f)
+        send $ def title (T.pack . show . ppName False $ f)
+             . def body (T.pack . show . ppDetails False $ f)
+             . def N.icon (T.pack $ get F.icon f)
              . def duration 0
              $ notification

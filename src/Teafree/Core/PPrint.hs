@@ -18,17 +18,36 @@
 
 -}
 
-module Teafree.Core.Classes
-    ( PPrint(..)
-    , Summary(..)
+module Teafree.Core.PPrint
+    ( Colorized
+    , PPrint(..)
     ) where
 
-class PPrint a where
-    pprint :: a -> String
+import Text.PrettyPrint.ANSI.Leijen
 
-class Summary a where
-    summary :: a -> String
+type Colorized = Bool
+
+undef :: String
+undef = "Not defined"
+
+class PPrint a where
+    ppName :: Colorized -> a -> Doc
+    ppDetails :: Colorized -> a -> Doc
+    ppSummary :: Colorized -> a -> Doc
+
+    pprint :: Colorized -> a -> Doc
+    pprint c a = (ppName c a) <$> indent 4 (ppDetails c a)
 
 instance (PPrint a) => PPrint (Maybe a) where
-    pprint Nothing = "Not defined"
-    pprint (Just v) = pprint v
+    ppName True Nothing = yellow . text $ undef
+    ppName False Nothing = text undef
+    ppName c (Just v) = ppDetails c v
+
+    ppDetails True Nothing = yellow . text $ undef
+    ppDetails False Nothing = text undef
+    ppDetails c (Just v) = ppDetails c v
+
+    ppSummary True Nothing = yellow . text $ undef
+    ppSummary False Nothing = text undef
+    ppSummary c (Just v) = ppSummary c v
+

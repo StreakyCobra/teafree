@@ -26,7 +26,7 @@ import Data.Label
 import Text.Printf
 import Text.PrettyPrint.ANSI.Leijen
 
-import Teafree.Core.Classes
+import Teafree.Core.PPrint
 import Teafree.Units
 
 fclabels [d|
@@ -41,42 +41,30 @@ fclabels [d|
     |]
 
 instance Show Family where
-    show t = show $
-                (text . get name $ t) <$>
-                indent 4 (
-                    text ("Quantity:") <+> text (show $ get quantity t) <$>
-                    text ("Temperature:") <+> text (show $ get temperature t) <$>
-                    text ("Time:") <+> text (show $ get time t) <$>
-                    text ("Cafeine:") <+>
-                        case (get cafeine t) of
-                            Just Free -> text "Cafeine free"
-                            Just v -> text (show v) <+> text "of a coffee"
-                            Nothing -> text "Unknown"
-                    ) <$>
-                    empty
+    show = show . pprint False
 
 instance PPrint Family where
-    pprint t = show $
-                (bold . dullred $ (text . get name $ t)) <$>
-                indent 4 (
-                    text (printf "%-15s" "Quantity:") <+> text (pprint $ get quantity t) <$>
-                    text (printf "%-15s" "Temperature:") <+> text (pprint $ get temperature t) <$>
-                    text (printf "%-15s" "Time:") <+> text (pprint $ get time t) <$>
+    ppName c v = i (bold . dullred) $ text . get name $ v
+            where i f = if c then f else id
+
+    ppDetails c t = text (printf "%-15s" "Quantity:") <+> (pprint c $ get quantity t) <$>
+                    text (printf "%-15s" "Temperature:") <+> (pprint c $ get temperature t) <$>
+                    text (printf "%-15s" "Time:") <+> (pprint c $ get time t) <$>
                     text (printf "%-15s" "Cafeine:") <+>
                         case (get cafeine t) of
-                            Just Free -> dullblue (text "Cafeine free")
-                            Just v -> text (pprint v) <+> text "of a coffee"
-                            Nothing -> yellow (text "Unknown")
-                    ) <$>
-                    empty
+                            Just Free -> (i dullblue) (text "Cafeine free")
+                            Just v -> (pprint c v) <+> text "of a coffee"
+                            Nothing -> (i yellow) (text "Unknown")
+            where i f = if c then f else id
 
-instance Summary Family where
-    summary f = printf "%s (%s | %s | %s%s)"
-                    (get name f)
-                    (show $ get quantity f)
-                    (show $ get temperature f)
-                    (show $ get time f)
-                    (show $ case (get cafeine f) of
-                        Just (Percent v) -> text " | " <> text (show v) <+> text "of a coffee"
-                        Just Free -> text " | " <> text "Cafeine free"
-                        Nothing -> text "")
+    ppSummary c f = text $ printf "%s (%s | %s | %s%s)"
+                            (get name f)
+                            (show $ get quantity f)
+                            (show $ get temperature f)
+                            (show $ get time f)
+                            (show $ case (get cafeine f) of
+                                Just (Percent v) -> text " | " <> text (show v) <+> text "of a coffee"
+                                Just Free -> text " | " <> text "Cafeine free"
+                                Nothing -> text "")
+
+
