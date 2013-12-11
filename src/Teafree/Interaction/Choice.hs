@@ -39,26 +39,26 @@ import Teafree.Family
 import Control.Exception
 default (T.Text)
 
-chooseTea :: Teafree Text
+chooseTea :: Teafree String
 chooseTea = do
         env <- ask
-        let listOfTeas = toList $ E.get teas env
+        let listOfTeas = listToText $ E.get teas env
         choice <- shellyNoDir $ silently $ print_stdout False $ do
                     return listOfTeas -|- chooser
-        return choice
+        return . T.unpack $ choice
 
-chooseFamily :: Teafree Text
+chooseFamily :: Teafree String
 chooseFamily = do
         env <- ask
-        let listOfFamilies = toList $ E.get families env
+        let listOfFamilies = listToText $ E.get families env
         choice <- shellyNoDir $ silently $ print_stdout False $ do
                     return listOfFamilies -|- chooser
-        return choice
+        return . T.unpack $ choice
 
 chooser :: Sh Text
 chooser = catch_sh
             (run "dmenu" ["-i", "-p", "teafree:", "-l", "10"])
             ((\_ -> return "") :: SomeException -> Sh Text)
 
-toList :: (PPrint a) => [a] -> Text
-toList = T.unlines . P.map (T.pack . show . ppSummary False)
+listToText :: (PPrint a) => [a] -> Text
+listToText = T.unlines . P.map (T.pack . show . ppName False)

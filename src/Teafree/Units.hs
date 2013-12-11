@@ -23,6 +23,7 @@ module Teafree.Units
     , Percentage (..)
     , Quantity (..)
     , Time (..)
+    , toSeconds
     ) where
 
 import Teafree.Core.PPrint
@@ -55,10 +56,10 @@ instance Show Percentage where
 
 
 instance PPrint Temperature where
-    pprint c (Celsius v) = ((i dullblue) . text . show $ v) <+> (text "°C")
+    pprint c (Celsius v) = (i (bold . dullblue) . text . show $ v) <+> (text "°C")
             where i f = if c then f else id
 
-    pprint c (Fahrenheit v) = ((i dullblue) . text . show $ v) <+> (text "°F")
+    pprint c (Fahrenheit v) = (i (bold . dullblue) . text . show $ v) <+> (text "°F")
             where i f = if c then f else id
 
     ppName = pprint
@@ -66,7 +67,7 @@ instance PPrint Temperature where
     ppSummary = pprint
 
 instance PPrint Quantity where
-    pprint c (Tsp v) = ((i dullblue) . text . show $ v) <+> (text "tsp.")
+    pprint c (Tsp v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp.")
             where i f = if c then f else id
 
     ppName = pprint
@@ -74,7 +75,7 @@ instance PPrint Quantity where
     ppSummary = pprint
 
 instance PPrint Time where
-    pprint c (Second v) = ((i dullblue) . text . show $ v) <+> (text "s.")
+    pprint c (Second v) = (i (bold . dullblue) . text . show $ v) <+> (text "s.")
             where i f = if c then f else id
 
     ppName = pprint
@@ -82,12 +83,15 @@ instance PPrint Time where
     ppSummary = pprint
 
 instance PPrint Percentage where
-    pprint c (Percent v) = ((i dullblue) . text . show $ v) <+> (text "%")
+    pprint c (Percent v) = (i (bold . dullblue) . text . show $ v) <+> (text "%")
             where i f = if c then f else id
 
-    pprint c Free = (i dullblue) $ text "Free"
+    pprint c Free = i (bold . dullblue) $ text "Free"
             where i f = if c then f else id
 
     ppName = pprint
     ppDetails = pprint
     ppSummary = pprint
+
+toSeconds :: Time -> Int
+toSeconds (Second s) = s

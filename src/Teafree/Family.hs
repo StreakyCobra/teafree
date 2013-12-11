@@ -47,24 +47,25 @@ instance PPrint Family where
     ppName c v = i (bold . dullred) $ text . get name $ v
             where i f = if c then f else id
 
-    ppDetails c t = text (printf "%-15s" "Quantity:") <+> (pprint c $ get quantity t) <$>
-                    text (printf "%-15s" "Temperature:") <+> (pprint c $ get temperature t) <$>
-                    text (printf "%-15s" "Time:") <+> (pprint c $ get time t) <$>
+    ppDetails c v = text (printf "%-15s" "Quantity:") <+> (pprint c $ get quantity v) <$>
+                    text (printf "%-15s" "Temperature:") <+> (pprint c $ get temperature v) <$>
+                    text (printf "%-15s" "Time:") <+> (pprint c $ get time v) <$>
                     text (printf "%-15s" "Cafeine:") <+>
-                        case (get cafeine t) of
-                            Just Free -> (i dullblue) (text "Cafeine free")
+                        case (get cafeine v) of
+                            Just Free -> (i yellow) (text "Cafeine free")
                             Just v -> (pprint c v) <+> text "of a coffee"
                             Nothing -> (i yellow) (text "Unknown")
             where i f = if c then f else id
 
-    ppSummary c f = text $ printf "%s (%s | %s | %s%s)"
-                            (get name f)
-                            (show $ get quantity f)
-                            (show $ get temperature f)
-                            (show $ get time f)
-                            (show $ case (get cafeine f) of
-                                Just (Percent v) -> text " | " <> text (show v) <+> text "of a coffee"
-                                Just Free -> text " | " <> text "Cafeine free"
-                                Nothing -> text "")
+    ppSummary c v = text (get name v) <+> text " (" <>
+                    (pprint c $ get quantity v) <> text " | " <>
+                    (pprint c $ get temperature v) <> text " | " <>
+                    (pprint c $ get time v) <>
+                    (case (get cafeine v) of
+                        Just Free -> text " | " <> (i yellow $ text "Cafeine free")
+                        Just t -> text " | " <> pprint c t <+> text "of a coffee"
+                        Nothing -> text "") <>
+                    text ")"
+            where i f = if c then f else id
 
 

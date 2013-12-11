@@ -33,8 +33,8 @@ module Teafree.Core.Environment
 import Data.Label
 
 import Paths_teafree
-import Teafree.Tea
-import Teafree.Family
+import Teafree.Tea as T
+import Teafree.Family as F
 import Teafree.Units
 
 fclabels [d|
@@ -59,3 +59,4 @@ getEnvironment = do
 
 defaultEnvironment :: Environment
 defaultEnvironment = Environment [] [] False False
+
