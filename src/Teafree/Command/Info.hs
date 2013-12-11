@@ -25,19 +25,29 @@ module Teafree.Command.Info
     ) where
 
 
+import Shelly hiding (get)
+import Data.Text as T
+
+import Paths_teafree
+import Teafree.Core.Environment
 import Teafree.Core.Monad
 import Teafree.Interaction.Notify
 import Teafree.Interaction.Choice
-
-import Shelly
-import Control.Monad
-import Data.Text as T
+import qualified Teafree.Family as F
 
 default (T.Text)
 
 {- Prepare a tea -}
 info :: Teafree ()
 info = do
+    content <- ask
     choice <- chooseFamily
+
+    let (_:f:_) = get families content
+
     shellyNoDir $ silently $ print_stdout False $ do
-        send $ def body choice . def title "Information" $ notification
+        send $ def title choice
+             . def body (T.pack . show $ f)
+             . def icon (T.pack $ get F.icon f)
+             . def duration 0
+             $ notification

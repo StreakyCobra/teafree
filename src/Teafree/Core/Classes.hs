@@ -1,5 +1,3 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,27 +18,17 @@
 
 -}
 
-module Teafree.Core.Monad
-    ( Teafree
-    , runTeafree
-    , liftIO
-    , ask
-    , failure
-    , return
+module Teafree.Core.Classes
+    ( PPrint(..)
+    , Summary(..)
     ) where
 
-import Control.Monad.Reader
-import Control.Monad.Error
+class PPrint a where
+    pprint :: a -> String
 
-import Teafree.Core.Environment
-import Teafree.Core.TeafreeError
+class Summary a where
+    summary :: a -> String
 
-newtype Teafree t = T {runT :: ErrorT TeafreeError (ReaderT Environment IO) t}
-    deriving (Monad, MonadError TeafreeError, MonadReader Environment,
-             MonadIO)
-
-runTeafree :: Teafree t -> Environment -> IO (Either TeafreeError t)
-runTeafree t = runReaderT $ runErrorT (runT t)
-
-failure :: String -> Teafree t
-failure = throwError . strMsg
+instance (PPrint a) => PPrint (Maybe a) where
+    pprint Nothing = "Not defined"
+    pprint (Just v) = pprint v

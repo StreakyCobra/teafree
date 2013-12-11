@@ -26,37 +26,39 @@ module Teafree.Interaction.Choice
     , chooser
     ) where
 
-import Teafree.Core.Monad
-import Teafree.Core.Environment as E
-import Teafree.Family
-
 import Prelude as P
 import Control.Monad
 import Data.Text as T
 import Shelly
 
+import Teafree.Core.Classes
+import Teafree.Core.Monad
+import Teafree.Core.Environment as E
+import Teafree.Family
+
 import Control.Exception
 default (T.Text)
 
-chooseTea :: Sh Text
-chooseTea = listOfTeas -|- chooser
-    where listOfTeas :: Sh Text
-          listOfTeas = liftM T.unlines $ lsT "."
+chooseTea :: Teafree Text
+chooseTea = do
+        env <- ask
+        let listOfTeas = toList $ E.get teas env
+        choice <- shellyNoDir $ silently $ print_stdout False $ do
+                    return listOfTeas -|- chooser
+        return choice
 
 chooseFamily :: Teafree Text
 chooseFamily = do
         env <- ask
-        let listOfFamilies = T.unlines . P.map (T.pack . summary) $ E.get families env
-        choice <- shelly $ return listOfFamilies -|- chooser
+        let listOfFamilies = toList $ E.get families env
+        choice <- shellyNoDir $ silently $ print_stdout False $ do
+                    return listOfFamilies -|- chooser
         return choice
-        {-
-        env <- ask
-        let listOfFamilies = T.unlines . P.map (T.pack . summary) $ E.get families env
-        choice <- shelly $ return listOfFamilies -|- chooser
-        return choice
-        -}
 
 chooser :: Sh Text
 chooser = catch_sh
             (run "dmenu" ["-i", "-p", "teafree:", "-l", "10"])
             ((\_ -> return "") :: SomeException -> Sh Text)
+
+toList :: (Summary a) => [a] -> Text
+toList = T.unlines . P.map (T.pack . summary)

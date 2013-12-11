@@ -26,6 +26,7 @@ import Data.Label
 import Text.Printf
 import Text.PrettyPrint.ANSI.Leijen
 
+import Teafree.Core.Classes
 import qualified Teafree.Family as F
 import Teafree.Units
 
@@ -50,3 +51,25 @@ instance Show Tea where
                     text (printf "%-15s" "Cafeine:") <+> text (show $ get cafeine t) <+> text "of a coffee"
                     ) <$>
                     empty
+
+instance PPrint Tea where
+    pprint t = show $
+                (bold . dullred $ (text . get name $ t)) <$>
+                indent 4 (
+                    text (printf "%-15s" "Quantity:") <+> text (pprint $ get quantity t) <$>
+                    text (printf "%-15s" "Temperature:") <+> text (pprint $ get temperature t) <$>
+                    text (printf "%-15s" "Time:") <+> text (pprint $ get time t) <$>
+                    text (printf "%-15s" "Cafeine:") <+> text (pprint $ get cafeine t) <+> text "of a coffee"
+                    ) <$>
+                    empty
+
+instance Summary Tea where
+    summary f = printf "%s (%s | %s | %s%s)"
+                    (get name f)
+                    (show $ get quantity f)
+                    (show $ get temperature f)
+                    (show $ get time f)
+                    (show $ case (get cafeine f) of
+                        Just (Percent v) -> text " | " <> text (show v) <+> text "of a coffee"
+                        Just Free -> text " | " <> text "Cafeine free"
+                        Nothing -> text "")
