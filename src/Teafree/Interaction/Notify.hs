@@ -30,10 +30,14 @@ module Teafree.Interaction.Notify
     , icon
     , urgency
     , category
+    , sendError
     ) where
+
+import Teafree.Core.Monad
 
 import Data.Label
 import Data.Text as T
+import Prelude as P
 import Shelly hiding (get)
 
 default (T.Text)
@@ -55,8 +59,11 @@ notification = N Nothing Nothing Nothing Nothing Nothing Nothing
 def :: (f :-> Maybe a) -> a -> f -> f
 def f v = set f $ Just v
 
-send :: Notification -> Sh ()
-send n = notifySend . Prelude.concat $ [d, c, u, i, t, b]
+notifySend :: [Text] -> Sh ()
+notifySend = run_ "notify-send"
+
+send :: Notification -> Teafree ()
+send n = shellyNoDir $ silently $ print_stdout False $ notifySend . P.concat $ [d, c, u, i, t, b]
     where d = case get duration n of
                   Nothing -> []
                   Just v -> ["-t", T.pack . show . (* 1000) $ v]
@@ -76,6 +83,10 @@ send n = notifySend . Prelude.concat $ [d, c, u, i, t, b]
                   Nothing -> []
                   Just v -> ["-c", v]
 
-notifySend :: [Text] -> Sh ()
-notifySend = run_ "notify-send"
+sendError :: Text -> Teafree ()
+sendError m = send $ def title "Error"
+               . def body m
+               . def icon "dialog-warning"
+               . def duration 5
+               $ notification
 

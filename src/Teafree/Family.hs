@@ -53,7 +53,7 @@ instance PPrint Family where
                     text (printf "%-15s" "Cafeine:") <+>
                         case (get cafeine v) of
                             Just Free -> (i yellow) (text "Cafeine free")
-                            Just v -> (pprint c v) <+> text "of a coffee"
+                            Just t -> (pprint c t) <+> text "of a coffee"
                             Nothing -> (i yellow) (text "Unknown")
             where i f = if c then f else id
 
@@ -67,5 +67,4 @@ instance PPrint Family where
                         Nothing -> text "") <>
                     text ")"
             where i f = if c then f else id
-
 

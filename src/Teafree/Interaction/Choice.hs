@@ -29,31 +29,33 @@ module Teafree.Interaction.Choice
 import Prelude as P
 import Control.Monad
 import Data.Text as T
-import Shelly
+import Data.List as DL
+import Shelly hiding (get)
 
 import Teafree.Core.PPrint
 import Teafree.Core.Monad
 import Teafree.Core.Environment as E
-import Teafree.Family
+import Teafree.Family as Fam
+import Teafree.Tea as Tea
 
 import Control.Exception
 default (T.Text)
 
-chooseTea :: Teafree String
+chooseTea :: Teafree (Maybe Tea)
 chooseTea = do
         env <- ask
         let listOfTeas = listToText $ E.get teas env
         choice <- shellyNoDir $ silently $ print_stdout False $ do
                     return listOfTeas -|- chooser
-        return . T.unpack $ choice
+        teaForName $ T.unpack choice
 
-chooseFamily :: Teafree String
+chooseFamily :: Teafree (Maybe Family)
 chooseFamily = do
         env <- ask
         let listOfFamilies = listToText $ E.get families env
         choice <- shellyNoDir $ silently $ print_stdout False $ do
                     return listOfFamilies -|- chooser
-        return . T.unpack $ choice
+        familyForName $ T.unpack choice
 
 chooser :: Sh Text
 chooser = catch_sh
@@ -62,3 +64,17 @@ chooser = catch_sh
 
 listToText :: (PPrint a) => [a] -> Text
 listToText = T.unlines . P.map (T.pack . show . ppName False)
+
+familyForName :: String -> Teafree (Maybe Family)
+familyForName n = do
+    env <- ask
+    when (P.length n == 0) $ failure "You must specify one item"
+    let query = P.head . P.words $ n
+    return . DL.find ((==query) . get Fam.name) $ get families env
+
+teaForName :: String -> Teafree (Maybe Tea)
+teaForName n = do
+    env <- ask
+    when (P.length n == 0) $ failure "You must specify one item"
+    let query = P.head . P.words $ n
+    return . DL.find ((==query) . get Tea.name) $ get teas env

@@ -41,8 +41,6 @@ fclabels [d|
     data Environment = Environment
         { teas         :: [Tea]
         , families     :: [Family]
-        , inFahreneit  :: Bool
-        , inFlOz       :: Bool
         } deriving (Show)
     |]
 
@@ -58,5 +56,5 @@ getEnvironment = do
 
 
 defaultEnvironment :: Environment
-defaultEnvironment = Environment [] [] False False
+defaultEnvironment = Environment [] []
 

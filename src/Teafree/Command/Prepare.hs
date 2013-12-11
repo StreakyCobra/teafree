@@ -32,7 +32,6 @@ import Paths_teafree
 import Teafree.Core.Environment
 import Teafree.Core.Monad
 import Teafree.Core.PPrint
-import Teafree.Core.Utils
 import Teafree.Interaction.Notify as N
 import Teafree.Interaction.Choice
 import Teafree.Family as F
@@ -43,22 +42,14 @@ default (T.Text)
 {- Prepare a tea -}
 prepare :: Teafree ()
 prepare = do
-    choice <- chooseTea
+    choice <- chooseFamily
 
-    s <- familyForName choice
-
-    case s of
-        Nothing -> shellyNoDir $ silently $ print_stdout False $ do
-                    send $ def title "Error"
-                         . def body "The family is not found"
-                         . def N.icon "dialog-warning"
-                         . def duration 5
-                         $ notification
+    case choice of
+        Nothing -> sendError "The selected item is not found"
         Just f -> do
             liftIO . threadDelay . (*1000000) . toSeconds $ get F.time f
-            shellyNoDir $ silently $ print_stdout False $ do
-                    send $ def title (T.pack . show . ppName False $ f)
-                         . def body (T.pack "Your tea is ready")
-                         . def N.icon (T.pack $ get F.icon f)
-                         . def duration 0
-                         $ notification
+            send $ def title (T.pack . show . ppName False $ f)
+                 . def body (T.pack "Your tea is ready")
+                 . def N.icon (T.pack $ get F.icon f)
+                 . def duration 0
+                 $ notification
