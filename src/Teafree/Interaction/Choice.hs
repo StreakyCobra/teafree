@@ -48,13 +48,13 @@ chooseFamily = chooseItem families (get Fam.name)
 chooseItem :: (Environment :-> [a]) -> (a -> String) -> Teafree (Maybe a)
 chooseItem a f = do
     env <- ask
-    choice <- choose . listToChoice f $ get a env
+    choice <- chooseText . listToText f $ get a env
     case choice of
         "" -> return Nothing
         _ -> forName a f $ DL.init . T.unpack $ choice
 
-choose :: Text -> Teafree Text
-choose t = shellyNoDir $ silently $ print_stdout False $ return t -|- chooser
+chooseText :: Text -> Teafree Text
+chooseText t = shellyNoDir $ silently $ print_stdout False $ return t -|- chooser
 
 chooser :: Sh Text
 chooser = catch_sh
@@ -66,6 +66,6 @@ forName a f s = do
     env <- ask
     return . DL.find ((==s) . f) $ get a env
 
-listToChoice :: (a -> String) -> [a] -> Text
-listToChoice f = T.unlines . map (T.pack . f)
+listToText :: (a -> String) -> [a] -> Text
+listToText f = T.unlines . map (T.pack . f)
 
