@@ -51,6 +51,7 @@ info = do
                       . def body (T.pack . show . ppDetails False $ f)
                       . def N.icon (T.pack $ get F.icon f)
                       . def duration 0
+                      . def urgency "normal"
                       $ notification
 
 

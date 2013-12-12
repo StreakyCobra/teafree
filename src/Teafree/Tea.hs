@@ -27,8 +27,8 @@ import Text.Printf
 import Text.PrettyPrint.ANSI.Leijen
 
 import Teafree.Core.PPrint
-import qualified Teafree.Family as F
 import Teafree.Units
+import qualified Teafree.Family as F
 
 fclabels [d|
     data Tea = Tea

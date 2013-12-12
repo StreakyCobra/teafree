@@ -95,3 +95,4 @@ instance PPrint Percentage where
 
 toSeconds :: Time -> Int
 toSeconds (Second s) = s
+

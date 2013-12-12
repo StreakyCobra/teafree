@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, TypeOperators #-}
 
 {-
 
@@ -23,58 +23,49 @@
 module Teafree.Interaction.Choice
     ( chooseTea
     , chooseFamily
-    , chooser
     ) where
 
-import Prelude as P
-import Control.Monad
-import Data.Text as T
-import Data.List as DL
-import Shelly hiding (get)
-
-import Teafree.Core.PPrint
 import Teafree.Core.Monad
-import Teafree.Core.Environment as E
+import Teafree.Core.Environment
+
 import Teafree.Family as Fam
 import Teafree.Tea as Tea
 
 import Control.Exception
+import Control.Monad
+import Data.Label
+import Data.List as DL
+import Shelly hiding (get)
+import Data.Text as T hiding (map)
 default (T.Text)
 
 chooseTea :: Teafree (Maybe Tea)
-chooseTea = do
-        env <- ask
-        let listOfTeas = listToText $ E.get teas env
-        choice <- shellyNoDir $ silently $ print_stdout False $ do
-                    return listOfTeas -|- chooser
-        teaForName $ T.unpack choice
+chooseTea = chooseItem teas (get Tea.name)
 
 chooseFamily :: Teafree (Maybe Family)
-chooseFamily = do
-        env <- ask
-        let listOfFamilies = listToText $ E.get families env
-        choice <- shellyNoDir $ silently $ print_stdout False $ do
-                    return listOfFamilies -|- chooser
-        familyForName $ T.unpack choice
+chooseFamily = chooseItem families (get Fam.name)
+
+chooseItem :: (Environment :-> [a]) -> (a -> String) -> Teafree (Maybe a)
+chooseItem a f = do
+    env <- ask
+    choice <- choose . listToChoice f $ get a env
+    case choice of
+        "" -> return Nothing
+        _ -> forName a f $ DL.init . T.unpack $ choice
+
+choose :: Text -> Teafree Text
+choose t = shellyNoDir $ silently $ print_stdout False $ return t -|- chooser
 
 chooser :: Sh Text
 chooser = catch_sh
             (run "dmenu" ["-i", "-p", "teafree:", "-l", "10"])
             ((\_ -> return "") :: SomeException -> Sh Text)
 
-listToText :: (PPrint a) => [a] -> Text
-listToText = T.unlines . P.map (T.pack . show . ppName False)
-
-familyForName :: String -> Teafree (Maybe Family)
-familyForName n = do
+forName :: (Environment :-> [a]) -> (a -> String) -> String -> Teafree (Maybe a)
+forName a f s = do
     env <- ask
-    when (P.length n == 0) $ failure "You must specify one item"
-    let query = P.head . P.words $ n
-    return . DL.find ((==query) . get Fam.name) $ get families env
+    return . DL.find ((==s) . f) $ get a env
 
-teaForName :: String -> Teafree (Maybe Tea)
-teaForName n = do
-    env <- ask
-    when (P.length n == 0) $ failure "You must specify one item"
-    let query = P.head . P.words $ n
-    return . DL.find ((==query) . get Tea.name) $ get teas env
+listToChoice :: (a -> String) -> [a] -> Text
+listToChoice f = T.unlines . map (T.pack . f)
+

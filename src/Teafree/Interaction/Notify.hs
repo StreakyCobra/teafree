@@ -53,11 +53,11 @@ fclabels [d|
         }
     |]
 
-notification :: Notification
-notification = N Nothing Nothing Nothing Nothing Nothing Nothing
-
 def :: (f :-> Maybe a) -> a -> f -> f
 def f v = set f $ Just v
+
+notification :: Notification
+notification = N Nothing Nothing Nothing Nothing Nothing Nothing
 
 notifySend :: [Text] -> Sh ()
 notifySend = run_ "notify-send"

@@ -27,7 +27,6 @@ import Teafree.Core.Monad
 import Teafree.Core.Environment
 import Teafree.Family
 
-{- Print the list of teas -}
 printList :: String -> Teafree ()
 printList "teas" = do
     content <- ask

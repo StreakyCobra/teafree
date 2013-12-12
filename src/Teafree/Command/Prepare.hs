@@ -52,4 +52,6 @@ prepare = do
                  . def body (T.pack "Your tea is ready")
                  . def N.icon (T.pack $ get F.icon f)
                  . def duration 0
+                 . def urgency (T.pack "critical")
                  $ notification
+
