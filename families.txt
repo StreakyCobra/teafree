@@ -1,0 +1,13 @@
+Name        : White Tea
+Icon        : images/white.png
+Quantity    : 1.5 tsp
+Temperature : 175 C
+Time        : 270s.
+Cafeine     : 1%
+
+Name        : Green
+Icon        : images/green.png
+Quantity    : 1 tsp
+Temperature : 175 C
+Time        : 60s.
+Cafeine     : 5%

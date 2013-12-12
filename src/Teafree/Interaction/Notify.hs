@@ -35,6 +35,7 @@ module Teafree.Interaction.Notify
 
 import Teafree.Core.Monad
 
+import Paths_teafree
 import Data.Label
 import Data.Text as T
 import Prelude as P

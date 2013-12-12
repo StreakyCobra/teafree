@@ -31,11 +31,13 @@ module Teafree.Core.Environment
     ) where
 
 import Data.Label
+import Control.Monad
 
 import Paths_teafree
 import Teafree.Tea as T
 import Teafree.Family as F
 import Teafree.Units
+import Teafree.Parser.Families
 
 fclabels [d|
     data Environment = Environment
@@ -46,12 +48,19 @@ fclabels [d|
 
 getEnvironment :: IO Environment
 getEnvironment = do
-    icon <- getDataFileName "images/mate.png"
-    icon2 <- getDataFileName "images/oolang.png"
-    icon3 <- getDataFileName "images/herbal.png"
-    let afam = [Family "Mate" icon (Tsp 2) (Celsius 100) (Second 1) Nothing, Family "Oolang" icon2 (Tsp 1) (Fahrenheit 95) (Second 2) (Just $ Percent 19), Family "Herbal" icon3 (Tsp 4) (Celsius 50) (Second 90) (Just Free)]
-    let env = set families afam $ defaultEnvironment
-    return env
+    content <- getDataFileName "families.txt" >>= readFile
+
+    let fams = parseFamilies content
+    case fams of
+        Left m -> return defaultEnvironment
+        Right fs -> do
+            cfs <- mapM ci fs
+            let env = set families cfs $ defaultEnvironment
+            return env
+    where ci f = do
+            v <- getDataFileName $ get F.icon f
+            let u = set F.icon v f
+            return u
 
 defaultEnvironment :: Environment
 defaultEnvironment = Environment [] []
