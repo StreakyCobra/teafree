@@ -22,10 +22,12 @@ module Teafree.Command.List
     ( printList
     ) where
 
-import Teafree.Core.PPrint
-import Teafree.Core.Monad
+
 import Teafree.Core.Environment
-import Teafree.Family
+import Teafree.Core.Monad
+import Teafree.Interaction.PPrint
+import Teafree.Entity.Family
+
 
 printList :: String -> Teafree ()
 printList "teas" = do

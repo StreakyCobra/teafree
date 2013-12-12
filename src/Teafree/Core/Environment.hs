@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell, TypeOperators #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,6 +18,8 @@
 
 -}
 
+{-# LANGUAGE TemplateHaskell, TypeOperators #-}
+
 module Teafree.Core.Environment
     ( Environment
     , getEnvironment
@@ -30,14 +30,16 @@ module Teafree.Core.Environment
     , families
     ) where
 
+
 import Data.Label
 import Control.Monad
 
 import Paths_teafree
-import Teafree.Tea as T
-import Teafree.Family as F
-import Teafree.Units
-import Teafree.Parser.Families
+import Teafree.Core.Parsers
+import Teafree.Entity.Family as F
+import Teafree.Entity.Tea as T
+import Teafree.Entity.Units
+
 
 fclabels [d|
     data Environment = Environment
@@ -48,20 +50,30 @@ fclabels [d|
 
 getEnvironment :: IO Environment
 getEnvironment = do
-    content <- getDataFileName "families.txt" >>= readFile
+    fContent <- getDataFileName "families.txt" >>= readFile
+    --tContent <- getDataFileName "teas.txt" >>= readFile
 
-    let fams = parseFamilies content
-    case fams of
-        Left m -> return defaultEnvironment
-        Right fs -> do
-            cfs <- mapM ci fs
-            let env = set families cfs $ defaultEnvironment
-            return env
-    where ci f = do
-            v <- getDataFileName $ get F.icon f
-            let u = set F.icon v f
-            return u
+    let fParsed = parseFamilies fContent
+    --let tParsed = parseTeas tContent
+
+    let fs = case fParsed of
+                 Left m -> []
+                 Right xs -> xs
+
+    --let ts = case tParsed of
+    --             Left m -> []
+    --             Right xs -> xs
+
+    cfs <- mapM correctIcon fs
+
+    return . set families cfs $ defaultEnvironment
 
 defaultEnvironment :: Environment
 defaultEnvironment = Environment [] []
+
+correctIcon :: Family -> IO Family
+correctIcon fam = do
+    nIcon <- getDataFileName $ get icon fam
+    let nFam = set icon nIcon fam
+    return nFam
 

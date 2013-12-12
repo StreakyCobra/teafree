@@ -18,7 +18,7 @@
 
 -}
 
-module Teafree.Units
+module Teafree.Entity.Units
     ( Temperature (..)
     , Percentage (..)
     , Quantity (..)
@@ -26,7 +26,8 @@ module Teafree.Units
     , toSeconds
     ) where
 
-import Teafree.Core.PPrint
+
+import Teafree.Interaction.PPrint
 
 import Text.PrettyPrint.ANSI.Leijen
 

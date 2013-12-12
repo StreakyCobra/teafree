@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings, TypeOperators #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,24 +18,29 @@
 
 -}
 
+{-# LANGUAGE OverloadedStrings, TypeOperators #-}
+
 module Teafree.Interaction.Choice
     ( chooseTea
     , chooseFamily
     ) where
 
-import Teafree.Core.Monad
-import Teafree.Core.Environment
-
-import Teafree.Family as Fam
-import Teafree.Tea as Tea
 
 import Control.Exception
 import Control.Monad
 import Data.Label
 import Data.List as DL
 import Shelly hiding (get)
+
+import Teafree.Core.Monad
+import Teafree.Core.Environment
+
+import Teafree.Entity.Family as Fam
+import Teafree.Entity.Tea as Tea
+
 import Data.Text as T hiding (map)
 default (T.Text)
+
 
 chooseTea :: Teafree (Maybe Tea)
 chooseTea = chooseItem teas (get Tea.name)

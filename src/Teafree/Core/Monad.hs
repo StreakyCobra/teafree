@@ -1,5 +1,3 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,6 +18,8 @@
 
 -}
 
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 module Teafree.Core.Monad
     ( Teafree
     , runTeafree
@@ -29,15 +29,16 @@ module Teafree.Core.Monad
     , return
     ) where
 
-import Control.Monad.Reader
+
 import Control.Monad.Error
+import Control.Monad.Reader
 
 import Teafree.Core.Environment
 import Teafree.Core.TeafreeError
 
+
 newtype Teafree t = T {runT :: ErrorT TeafreeError (ReaderT Environment IO) t}
-    deriving (Monad, MonadError TeafreeError, MonadReader Environment,
-             MonadIO)
+    deriving (Monad, MonadError TeafreeError, MonadReader Environment, MonadIO)
 
 runTeafree :: Teafree t -> Environment -> IO (Either TeafreeError t)
 runTeafree t = runReaderT $ runErrorT (runT t)

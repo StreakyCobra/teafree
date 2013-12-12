@@ -17,13 +17,14 @@
 
 -}
 
-module Teafree.Parser.Families where
+module Teafree.Core.Parsers where
 
-import Teafree.Family
-import Teafree.Units
 
 import Text.Parsec
 import Control.Applicative ((<$), (<*), (*>), liftA)
+
+import Teafree.Entity.Family
+import Teafree.Entity.Units
 
 
 parseFamilies :: String -> Either ParseError [Family]
@@ -63,3 +64,4 @@ pTime = do
 pPercentage = do
     value <- many digit <* spaces <* string "%"
     return . Just . Percent . read $ value
+

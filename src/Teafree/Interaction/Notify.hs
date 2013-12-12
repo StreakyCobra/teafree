@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell, TypeOperators, OverloadedStrings #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,6 +18,8 @@
 
 -}
 
+{-# LANGUAGE TemplateHaskell, TypeOperators, OverloadedStrings #-}
+
 module Teafree.Interaction.Notify
     ( send
     , notification
@@ -33,15 +33,17 @@ module Teafree.Interaction.Notify
     , sendError
     ) where
 
-import Teafree.Core.Monad
 
-import Paths_teafree
 import Data.Label
-import Data.Text as T
 import Prelude as P
 import Shelly hiding (get)
 
+import Paths_teafree
+import Teafree.Core.Monad
+
+import Data.Text as T
 default (T.Text)
+
 
 fclabels [d|
     data Notification = N

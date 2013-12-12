@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,6 +18,8 @@
 
 -}
 
+{-# LANGUAGE OverloadedStrings #-}
+
 module Teafree.Command.Info
     ( info
     ) where
@@ -27,20 +27,21 @@ module Teafree.Command.Info
 
 import Prelude as P
 import Shelly hiding (get)
-import Data.Text as T
 import Data.List as DL
 
 import Paths_teafree
-import Teafree.Core.PPrint
 import Teafree.Core.Environment
 import Teafree.Core.Monad
+import Teafree.Interaction.PPrint
 import Teafree.Interaction.Notify as N
 import Teafree.Interaction.Choice
-import Teafree.Family as F
+import Teafree.Entity.Family as F
 
+import Data.Text as T
 default (T.Text)
 
-{- Prepare a tea -}
+
+{- Information about a tea -}
 info :: Teafree ()
 info = do
     choice <- chooseFamily
@@ -53,5 +54,4 @@ info = do
                       . def duration 0
                       . def urgency "normal"
                       $ notification
-
 

@@ -20,7 +20,9 @@
 
 module Teafree.Core.TeafreeError where
 
+
 import Control.Monad.Error
+
 
 data TeafreeError = M String
     deriving (Eq, Show)
@@ -31,3 +33,4 @@ instance Error TeafreeError where
 
 getErrorMsg :: TeafreeError -> String
 getErrorMsg (M m) = m
+

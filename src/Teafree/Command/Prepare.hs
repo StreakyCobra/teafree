@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,24 +18,28 @@
 
 -}
 
+{-# LANGUAGE OverloadedStrings #-}
+
 module Teafree.Command.Prepare
     ( prepare
     ) where
 
+
 import Control.Concurrent
-import Data.Text as T
 import Shelly hiding (get)
 
 import Paths_teafree
 import Teafree.Core.Environment
 import Teafree.Core.Monad
-import Teafree.Core.PPrint
-import Teafree.Interaction.Notify as N
+import Teafree.Interaction.PPrint
 import Teafree.Interaction.Choice
-import Teafree.Family as F
-import Teafree.Units as F
+import Teafree.Interaction.Notify as N
+import Teafree.Entity.Family as F
+import Teafree.Entity.Units as F
 
+import Data.Text as T
 default (T.Text)
+
 
 {- Prepare a tea -}
 prepare :: Teafree ()
