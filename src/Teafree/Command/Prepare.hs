@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,38 +18,40 @@
 
 -}
 
+{-# LANGUAGE OverloadedStrings #-}
+
 module Teafree.Command.Prepare
     ( prepare
     ) where
 
+
 import Control.Concurrent
-import Data.Text as T
 import Shelly hiding (get)
 
-import Paths_teafree
-import Teafree.Core.Environment
 import Teafree.Core.Monad
-import Teafree.Core.PPrint
-import Teafree.Interaction.Notify as N
-import Teafree.Interaction.Choice
-import Teafree.Family as F
-import Teafree.Units as F
 
+import Teafree.Interaction.PPrint
+import Teafree.Interaction.Choice
+import Teafree.Interaction.Notify
+
+import Teafree.Entity.Units
+import qualified Teafree.Entity.Tea as Tea
+
+import Data.Text as T
 default (T.Text)
+
 
 {- Prepare a tea -}
 prepare :: Teafree ()
 prepare = do
-    choice <- chooseFamily
+    choice <- chooseTea `catchAny` sendTeafreeError
 
-    case choice of
-        Nothing -> sendError "The selected item is not found"
-        Just f -> do
-            liftIO . threadDelay . (*1000000) . toSeconds $ get F.time f
-            send $ def title (T.pack . show . ppName False $ f)
-                 . def body (T.pack "Your tea is ready")
-                 . def N.icon (T.pack $ get F.icon f)
-                 . def duration 0
-                 . def urgency (T.pack "critical")
-                 $ notification
+    liftIO . threadDelay . (*1000000) . toSeconds $ Tea.time choice
+
+    send $ def title (T.pack . show . ppName False $ choice)
+         . def body ("Your tea is ready")
+         . def icon (Tea.icon choice)
+         . def duration 0
+         . def urgency "critical"
+         $ notification
 

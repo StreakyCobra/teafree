@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,18 +18,24 @@
 
 -}
 
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Main where
+
 
 import System.Console.CmdArgs
 import System.Exit (exitSuccess, exitFailure)
 
+import Teafree.Core.Config
 import Teafree.Core.Environment
 import Teafree.Core.Monad
 import Teafree.Core.TeafreeError
 import Teafree.Core.Version
-import qualified Teafree.Command.List as CL
+
 import qualified Teafree.Command.Info as CI
+import qualified Teafree.Command.List as CL
 import qualified Teafree.Command.Prepare as CP
+
 
 {- Teafree available modes -}
 data TeafreeMode = List {what :: String}
@@ -42,7 +46,7 @@ data TeafreeMode = List {what :: String}
 {- Mode to list items -}
 list :: TeafreeMode
 list = List {what = def &= opt "teas" &= typ "WHAT" &= argPos 0}
-    &= help "List items, where 'WHAT' is either 'teas' or 'categories'"
+    &= help "List items, where 'WHAT' is either 'teas' or 'families'"
 
 {- Mode to get informations about a tea -}
 info :: TeafreeMode
@@ -75,10 +79,15 @@ runMode Prepare = CP.prepare
 main :: IO ()
 main = do
     m <- cmdArgsRun teafree
-    e <- getEnvironment
+    e <- runTeafree getEnvironment defaultEnvironment >>= select
     runTeafree (runMode m) e >>= end
+
+select :: Either TeafreeError Environment -> IO Environment
+select (Left e) = putStrLn (getErrorMsg e) >> exitFailure
+select (Right e) = return e
 
 {- End the program properly, by verifying error messages -}
 end :: Either TeafreeError () -> IO ()
 end (Left e) = putStrLn (getErrorMsg e) >> exitFailure
 end (Right _) = exitSuccess
+

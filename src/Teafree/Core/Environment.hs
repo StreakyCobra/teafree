@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell, TypeOperators #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,39 +18,48 @@
 
 -}
 
+{-# LANGUAGE TemplateHaskell, TypeOperators #-}
+
 module Teafree.Core.Environment
     ( Environment
-    , getEnvironment
+    , defaultEnvironment
     , get
     , set
     , modify
     , teas
     , families
+    , quantityTo
+    , temperatureTo
     ) where
 
+
 import Data.Label
+import Data.List as DL
+import Control.Monad
+import System.Directory
+import System.Environment (lookupEnv)
+import System.FilePath
 
 import Paths_teafree
-import Teafree.Tea as T
-import Teafree.Family as F
-import Teafree.Units
+import Teafree.Core.Parsers
+import Teafree.Entity.Family as F
+import Teafree.Entity.Tea as Tea
+import Teafree.Entity.Units as U
+
+import Data.Text as T
+import Data.Text.IO as TIO
+default (T.Text)
+
 
 fclabels [d|
     data Environment = Environment
-        { teas         :: [Tea]
-        , families     :: [Family]
-        } deriving (Show)
+        { teas           :: [Tea]
+        , families       :: [Family]
+        , quantityTo     :: U.Quantity -> U.Quantity
+        , temperatureTo  :: U.Temperature -> U.Temperature
+        }
     |]
 
-getEnvironment :: IO Environment
-getEnvironment = do
-    icon <- getDataFileName "images/mate.png"
-    icon2 <- getDataFileName "images/oolang.png"
-    icon3 <- getDataFileName "images/herbal.png"
-    let afam = [Family "Mate" icon (Tsp 2) (Celsius 100) (Second 1) Nothing, Family "Oolang" icon2 (Tsp 1) (Fahrenheit 95) (Second 2) (Just $ Percent 19), Family "Herbal" icon3 (Tsp 4) (Celsius 50) (Second 90) (Just Free)]
-    let env = set families afam $ defaultEnvironment
-    return env
-
 defaultEnvironment :: Environment
-defaultEnvironment = Environment [] []
+defaultEnvironment = Environment [] [] id id
 

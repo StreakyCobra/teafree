@@ -18,15 +18,21 @@
 
 -}
 
-module Teafree.Units
+module Teafree.Entity.Units
     ( Temperature (..)
     , Percentage (..)
     , Quantity (..)
     , Time (..)
     , toSeconds
+    , toDl
+    , toOz
+    , toC
+    , toF
     ) where
 
-import Teafree.Core.PPrint
+import Data.Ratio
+
+import Teafree.Interaction.PPrint
 
 import Text.PrettyPrint.ANSI.Leijen
 
@@ -34,12 +40,12 @@ import Text.PrettyPrint.ANSI.Leijen
 data Temperature = Celsius Int
                  | Fahrenheit Int
 
-data Percentage = Percent Int
-                | Free
-
-newtype Quantity = Tsp Double
+data Quantity = TspDl Double
+              | TspOz Double
 
 newtype Time = Second Int
+
+newtype Percentage = Percent Int
 
 
 instance Show Temperature where
@@ -67,7 +73,10 @@ instance PPrint Temperature where
     ppSummary = pprint
 
 instance PPrint Quantity where
-    pprint c (Tsp v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp.")
+    pprint c (TspDl v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp/2dl")
+            where i f = if c then f else id
+
+    pprint c (TspOz v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp/8oz")
             where i f = if c then f else id
 
     ppName = pprint
@@ -75,7 +84,17 @@ instance PPrint Quantity where
     ppSummary = pprint
 
 instance PPrint Time where
-    pprint c (Second v) = (i (bold . dullblue) . text . show $ v) <+> (text "s.")
+    pprint c (Second v) = let (h, hr) = quotRem v 3600 in
+                          let (m, s) = quotRem hr 60 in
+                          case h of
+                              0 -> empty
+                              p -> (i (bold . dullblue) . text . show $ p) <+> (text "h ")
+                          <> case m of
+                              0 -> empty
+                              p -> (i (bold . dullblue) . text . show $ p) <+> (text "m ")
+                          <> case s of
+                              0 -> empty
+                              p -> (i (bold . dullblue) . text . show $ p) <+> (text "s")
             where i f = if c then f else id
 
     ppName = pprint
@@ -83,10 +102,10 @@ instance PPrint Time where
     ppSummary = pprint
 
 instance PPrint Percentage where
-    pprint c (Percent v) = (i (bold . dullblue) . text . show $ v) <+> (text "%")
+    pprint c (Percent 0) = i (bold . dullblue) $ text "Free"
             where i f = if c then f else id
 
-    pprint c Free = i (bold . dullblue) $ text "Free"
+    pprint c (Percent v) = (i (bold . dullblue) . text . show $ v) <+> (text "%")
             where i f = if c then f else id
 
     ppName = pprint
@@ -96,3 +115,23 @@ instance PPrint Percentage where
 toSeconds :: Time -> Int
 toSeconds (Second s) = s
 
+toDl :: Quantity -> Quantity
+toDl (TspDl v) = TspDl v
+toDl (TspOz v) = TspDl . (/10) . fromIntegral . roundTo 5 . round . (*10) . (/1.18) $ v
+
+toOz :: Quantity -> Quantity
+toOz (TspOz v) = TspOz v
+toOz (TspDl v) = TspOz . (/10) . fromIntegral . roundTo 5 . round . (*10) . (*1.18) $ v
+
+toF :: Temperature -> Temperature
+toF (Fahrenheit v) = Fahrenheit v
+toF (Celsius v) = Fahrenheit . roundTo 5 . round $ (fromIntegral v) * (9.0 / 5.0) + 32.0
+
+toC :: Temperature -> Temperature
+toC (Celsius v) = Celsius v
+toC (Fahrenheit v) = Celsius . roundTo 5 . round $ ((fromIntegral v) - 32) * (5.0 / 9.0)
+
+roundTo :: Int -> Int -> Int
+roundTo a v = a * q + u
+    where (q, r) = quotRem v a
+          u = if (fromIntegral r) > ((fromIntegral a) / 2) then a else 0

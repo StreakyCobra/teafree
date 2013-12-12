@@ -1,0 +1,98 @@
+Name        : White Tea
+Icon        : images/white.png
+Quantity    : 1.5 tsp/8oz
+Temperature : 175 °F
+Time        : 4 m 30 s
+Cafeine     : 1%
+
+Name        : Flavored White Tea
+Icon        : images/flavored_white.png
+Quantity    : 1.5 tsp/8oz
+Temperature : 175 °F
+Time        : 2 m
+Cafeine     : 1%
+
+Name        : Yellow Tea
+Icon        : images/yellow.png
+Quantity    : 1 tsp/8oz
+Temperature : 175 °F
+Time        : 1 m
+# Cafeine   : ??                         # UNKNOW
+
+Name        : Green Tea
+Icon        : images/green.png
+Quantity    : 1 tsp/8oz
+Temperature : 175 °F
+Time        : 50 s
+Cafeine     : 8%
+
+Name        : Flavored Green Tea
+Icon        : images/flavored_green.png
+Quantity    : 1 tsp/8oz
+Temperature : 175 °F
+Time        : 50 s
+Cafeine     : 8%
+
+Name        : Oolong Tea
+Icon        : images/oolong.png
+Quantity    : 1 tsp/8oz
+Temperature : 195 °F
+Time        : 3 m
+Cafeine     : 20%
+
+Name        : Flavored Oolong Tea
+Icon        : images/flavored_oolong.png
+Quantity    : 1 tsp/8oz
+Temperature : 195 °F
+Time        : 3 m
+Cafeine     : 20%
+
+Name        : Black Tea
+Icon        : images/black.png
+Quantity    : 1 tsp/8oz
+Temperature : 200 °F
+Time        : 2 m 30 s
+Cafeine     : 20%
+
+Name        : Flavored Black Tea
+Icon        : images/flavored_black.png
+Quantity    : 1 tsp/8oz
+Temperature : 200 °F
+Time        : 2 m 30 s
+Cafeine     : 20%
+
+Name        : Maté Tea
+Icon        : images/mate.png
+Quantity    : 1.5 tsp/8oz
+Temperature : 208 °F
+Time        : 5 m 30 s
+Cafeine     : 100%
+
+Name        : Rooibos Tea
+Icon        : images/rooibos.png
+Quantity    : 1.5 tsp/8oz
+Temperature : 208 °F
+Time        : 5 m 30 s
+Cafeine     : 0%
+
+Name        : Flavored Rooibos Tea
+Icon        : images/flavored_rooibos.png
+Quantity    : 1.5 tsp/8oz
+Temperature : 208 °F
+Time        : 5 m 30 s
+Cafeine     : 0%
+
+Name        : Herbal Tea
+Icon        : images/herbal.png
+Quantity    : 1.5 tsp/8oz
+Temperature : 208 °F
+Time        : 5 m 30 s
+Cafeine     : 0%
+
+Name        : Pu Erh Tea
+Icon        : images/pu_erh.png
+Quantity    : 1.5 tsp/8oz
+Temperature : 208 °F
+Time        : 5 m 30 s
+Cafeine     : 0%
+

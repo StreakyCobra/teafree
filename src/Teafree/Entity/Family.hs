@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell, TypeOperators #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,19 +18,26 @@
 
 -}
 
-module Teafree.Family where
+{-# LANGUAGE TemplateHaskell, TypeOperators #-}
+
+module Teafree.Entity.Family where
+
 
 import Data.Label
 import Text.Printf
-import Text.PrettyPrint.ANSI.Leijen
+import Text.PrettyPrint.ANSI.Leijen as PP
 
-import Teafree.Core.PPrint
-import Teafree.Units
+import Teafree.Interaction.PPrint
+import Teafree.Entity.Units
+
+import Data.Text as T
+default (T.Text)
+
 
 fclabels [d|
     data Family = Family
-        { name        :: String
-        , icon        :: String
+        { name        :: Text
+        , icon        :: Text
         , quantity    :: Quantity
         , temperature :: Temperature
         , time        :: Time
@@ -44,7 +49,7 @@ instance Show Family where
     show = show . pprint False
 
 instance PPrint Family where
-    ppName c v = i (bold . dullred) $ text . get name $ v
+    ppName c v = i (bold . dullred) $ text . T.unpack . get name $ v
             where i f = if c then f else id
 
     ppDetails c v = text (printf "%-15s" "Quantity:") <+> (pprint c $ get quantity v) <$>
@@ -52,18 +57,17 @@ instance PPrint Family where
                     text (printf "%-15s" "Time:") <+> (pprint c $ get time v) <$>
                     text (printf "%-15s" "Cafeine:") <+>
                         case (get cafeine v) of
-                            Just Free -> (i yellow) (text "Cafeine free")
-                            Just t -> (pprint c t) <+> text "of a coffee"
+                            Just t -> (pprint c t) <+> text "of coffee"
                             Nothing -> (i yellow) (text "Unknown")
+                    <$> PP.empty
             where i f = if c then f else id
 
-    ppSummary c v = text (get name v) <+> text " (" <>
+    ppSummary c v = text (T.unpack $ get name v) <+> text " (" <>
                     (pprint c $ get quantity v) <> text " | " <>
                     (pprint c $ get temperature v) <> text " | " <>
                     (pprint c $ get time v) <>
                     (case (get cafeine v) of
-                        Just Free -> text " | " <> (i yellow $ text "Cafeine free")
-                        Just t -> text " | " <> pprint c t <+> text "of a coffee"
+                        Just t -> text " | " <> pprint c t <+> text "of coffee"
                         Nothing -> text "") <>
                     text ")"
             where i f = if c then f else id

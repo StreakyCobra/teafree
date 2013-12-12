@@ -24,6 +24,7 @@ module Teafree.Core.Version
     , releaseName
     ) where
 
+
 {- Release version and name -}
 release :: String
 release = releaseVersion ++ " " ++ show releaseName
@@ -35,3 +36,4 @@ releaseVersion = "0.1.0.0"
 {- Release name -}
 releaseName :: String
 releaseName = "A pale blue coconut"
+

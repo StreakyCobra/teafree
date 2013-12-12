@@ -18,12 +18,16 @@
 
 -}
 
-module Teafree.Core.PPrint
+{-# LANGUAGE OverloadedStrings #-}
+
+module Teafree.Interaction.PPrint
     ( Colorized
     , PPrint(..)
     ) where
 
+
 import Text.PrettyPrint.ANSI.Leijen
+
 
 type Colorized = Bool
 

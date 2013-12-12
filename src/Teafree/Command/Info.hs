@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 {-
 
     teafree, a Haskell utility for tea addicts
@@ -20,38 +18,36 @@
 
 -}
 
+{-# LANGUAGE OverloadedStrings #-}
+
 module Teafree.Command.Info
     ( info
     ) where
 
 
 import Prelude as P
-import Shelly hiding (get)
-import Data.Text as T
-import Data.List as DL
 
-import Paths_teafree
-import Teafree.Core.PPrint
-import Teafree.Core.Environment
 import Teafree.Core.Monad
+
+import Teafree.Interaction.PPrint
 import Teafree.Interaction.Notify as N
 import Teafree.Interaction.Choice
-import Teafree.Family as F
 
+import qualified Teafree.Entity.Tea as Tea
+
+import Data.Text as T
 default (T.Text)
 
-{- Prepare a tea -}
+
+{- Information about a tea -}
 info :: Teafree ()
 info = do
-    choice <- chooseFamily
+    choice <- chooseTea `catchAny` sendTeafreeError
 
-    case choice of
-        Nothing -> sendError "The selected item is not found"
-        Just f -> send $ def title (T.pack . show . ppName False $ f)
-                      . def body (T.pack . show . ppDetails False $ f)
-                      . def N.icon (T.pack $ get F.icon f)
-                      . def duration 0
-                      . def urgency "normal"
-                      $ notification
-
+    send . def title (T.pack . show . ppName False $ choice)
+         . def body (T.pack . show . ppDetails False $ choice)
+         . def icon (Tea.icon choice)
+         . def duration 0
+         . def urgency "normal"
+         $ notification
 
