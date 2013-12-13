@@ -26,7 +26,6 @@ module Teafree.Command.List
 import Teafree.Core.Environment
 import Teafree.Core.Monad
 import Teafree.Interaction.PPrint
-import Teafree.Entity.Family
 
 
 printList :: String -> Teafree ()

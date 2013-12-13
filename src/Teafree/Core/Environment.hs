@@ -33,12 +33,14 @@ module Teafree.Core.Environment
 
 import Data.Label
 import Control.Monad
+import System.Directory
+import System.Environment (lookupEnv)
+import System.FilePath
 
 import Paths_teafree
 import Teafree.Core.Parsers
 import Teafree.Entity.Family as F
 import Teafree.Entity.Tea as T
-import Teafree.Entity.Units
 
 
 fclabels [d|
@@ -48,16 +50,19 @@ fclabels [d|
         } deriving (Show)
     |]
 
+defaultEnvironment :: Environment
+defaultEnvironment = Environment [] []
+
 getEnvironment :: IO Environment
 getEnvironment = do
-    fContent <- getDataFileName "families.txt" >>= readFile
-    --tContent <- getDataFileName "teas.txt" >>= readFile
+    fContent <- getOrCopyConfigFileName "families.txt" >>= readFile
+    --tContent <- getOrCopyConfigFileName "teas.txt" >>= readFile
 
     let fParsed = parseFamilies fContent
     --let tParsed = parseTeas tContent
 
     let fs = case fParsed of
-                 Left m -> []
+                 Left _ -> []
                  Right xs -> xs
 
     --let ts = case tParsed of
@@ -68,12 +73,41 @@ getEnvironment = do
 
     return . set families cfs $ defaultEnvironment
 
-defaultEnvironment :: Environment
-defaultEnvironment = Environment [] []
-
 correctIcon :: Family -> IO Family
-correctIcon fam = do
-    nIcon <- getDataFileName $ get icon fam
-    let nFam = set icon nIcon fam
+correctIcon f = do
+    nIcon <- getDataFileName $ get icon f
+    let nFam = set icon nIcon f
     return nFam
+
+getConfigDirectory :: IO FilePath
+getConfigDirectory = do
+    configHomeVar <- lookupEnv "XDG_CONFIG_HOME"
+
+    let configHome = case configHomeVar of
+                   Just v -> v
+                   Nothing -> "$HOME/.config"
+
+    let configDir = configHome </> "teafree"
+
+    dirExist <- doesDirectoryExist configDir
+
+    when (not dirExist) $ do
+        createDirectory configDir
+
+    return configDir
+
+getConfigFileName :: FilePath -> IO FilePath
+getConfigFileName f = do
+    configDir <- getConfigDirectory
+    return $ configDir </> f
+
+getOrCopyConfigFileName :: FilePath -> IO FilePath
+getOrCopyConfigFileName f = do
+    file <- getConfigFileName f
+    fileExist <- doesFileExist file
+    when (not fileExist) $ do
+        original <- getDataFileName f
+        print original
+        copyFile original file
+    return file
 

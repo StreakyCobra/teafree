@@ -38,7 +38,6 @@ import Data.Label
 import Prelude as P
 import Shelly hiding (get)
 
-import Paths_teafree
 import Teafree.Core.Monad
 
 import Data.Text as T

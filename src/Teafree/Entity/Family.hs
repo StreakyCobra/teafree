@@ -54,8 +54,7 @@ instance PPrint Family where
                     text (printf "%-15s" "Time:") <+> (pprint c $ get time v) <$>
                     text (printf "%-15s" "Cafeine:") <+>
                         case (get cafeine v) of
-                            Just Free -> (i yellow) (text "Cafeine free")
-                            Just t -> (pprint c t) <+> text "of a coffee"
+                            Just t -> (pprint c t) <+> text "of coffee"
                             Nothing -> (i yellow) (text "Unknown")
             where i f = if c then f else id
 
@@ -64,8 +63,7 @@ instance PPrint Family where
                     (pprint c $ get temperature v) <> text " | " <>
                     (pprint c $ get time v) <>
                     (case (get cafeine v) of
-                        Just Free -> text " | " <> (i yellow $ text "Cafeine free")
-                        Just t -> text " | " <> pprint c t <+> text "of a coffee"
+                        Just t -> text " | " <> pprint c t <+> text "of coffee"
                         Nothing -> text "") <>
                     text ")"
             where i f = if c then f else id

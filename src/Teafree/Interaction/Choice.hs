@@ -27,7 +27,6 @@ module Teafree.Interaction.Choice
 
 
 import Control.Exception
-import Control.Monad
 import Data.Label
 import Data.List as DL
 import Shelly hiding (get)

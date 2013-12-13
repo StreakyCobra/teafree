@@ -26,10 +26,7 @@ module Teafree.Command.Info
 
 
 import Prelude as P
-import Shelly hiding (get)
-import Data.List as DL
 
-import Paths_teafree
 import Teafree.Core.Environment
 import Teafree.Core.Monad
 import Teafree.Interaction.PPrint

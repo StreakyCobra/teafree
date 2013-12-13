@@ -35,12 +35,12 @@ import Text.PrettyPrint.ANSI.Leijen
 data Temperature = Celsius Int
                  | Fahrenheit Int
 
-data Percentage = Percent Int
-                | Free
-
-newtype Quantity = Tsp Double
+data Quantity = TspDl Double
+              | TspOz Double
 
 newtype Time = Second Int
+
+newtype Percentage = Percent Int
 
 
 instance Show Temperature where
@@ -68,7 +68,10 @@ instance PPrint Temperature where
     ppSummary = pprint
 
 instance PPrint Quantity where
-    pprint c (Tsp v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp.")
+    pprint c (TspDl v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp/dl")
+            where i f = if c then f else id
+
+    pprint c (TspOz v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp/8oz")
             where i f = if c then f else id
 
     ppName = pprint
@@ -76,7 +79,17 @@ instance PPrint Quantity where
     ppSummary = pprint
 
 instance PPrint Time where
-    pprint c (Second v) = (i (bold . dullblue) . text . show $ v) <+> (text "s.")
+    pprint c (Second v) = let (h, hr) = quotRem v 3600 in
+                          let (m, s) = quotRem hr 60 in
+                          case h of
+                              0 -> empty
+                              v -> (i (bold . dullblue) . text . show $ v) <+> (text "h ")
+                          <> case m of
+                              0 -> empty
+                              v -> (i (bold . dullblue) . text . show $ v) <+> (text "m ")
+                          <> case s of
+                              0 -> empty
+                              v -> (i (bold . dullblue) . text . show $ v) <+> (text "s")
             where i f = if c then f else id
 
     ppName = pprint
@@ -84,10 +97,10 @@ instance PPrint Time where
     ppSummary = pprint
 
 instance PPrint Percentage where
-    pprint c (Percent v) = (i (bold . dullblue) . text . show $ v) <+> (text "%")
+    pprint c (Percent 0) = i (bold . dullblue) $ text "Free"
             where i f = if c then f else id
 
-    pprint c Free = i (bold . dullblue) $ text "Free"
+    pprint c (Percent v) = (i (bold . dullblue) . text . show $ v) <+> (text "%")
             where i f = if c then f else id
 
     ppName = pprint

@@ -21,47 +21,99 @@ module Teafree.Core.Parsers where
 
 
 import Text.Parsec
-import Control.Applicative ((<$), (<*), (*>), liftA)
+import Control.Applicative ((<*), (*>))
 
-import Teafree.Entity.Family
-import Teafree.Entity.Units
+import qualified Teafree.Entity.Family as F
+import qualified Teafree.Entity.Tea as T
+import qualified Teafree.Entity.Units as U
 
+parseTeas :: String -> Either ParseError [T.Tea]
+parseTeas = parse pTeasFile ""
 
-parseFamilies :: String -> Either ParseError [Family]
-parseFamilies = parse famFile ""
+pTeasFile = many pTea <* eof
 
-famFile = many fam <* eof
+pTea = do
+    _ <- many (newline <|> pComment)
+    name <- pField "Name" anyChar
+    _ <- many (newline <|> pComment)
+    fam <- pField "Family" anyChar
+    _ <- many (newline <|> pComment)
+    production <- optionMaybe $ pField "Production" pQuantity
+    _ <- many (newline <|> pComment)
+    quantity <- pField "Quantity" pTemperature
+    _ <- many (newline <|> pComment)
+    temperature <- pField "Temperature" pTemperature
+    _ <- many (newline <|> pComment)
+    time <- pField "Time" pTime
+    _ <- many (newline <|> pComment)
+    cafeine <- optionMaybe $ pField "Cafeine" pPercentage
+    _ <- many (newline <|> pComment)
 
-fam = do
-    name <- field "Name" anyChar
-    icon <- field "Icon" anyChar
-    quantity <- field "Quantity" pQuantity
-    temperature <- field "Temperature" pTemperature
-    time <- field "Time" pTime
-    cafeine <- field "Cafeine" pPercentage
-    many newline
-    let aFamily = Family name icon (head quantity) (head temperature) (head time) (head cafeine)
+    let aTea = undefined
+
+    return aTea
+
+parseFamilies :: String -> Either ParseError [F.Family]
+parseFamilies = parse pFamiliesFile ""
+
+pFamiliesFile = many pFamily <* eof
+
+pFamily = do
+    _ <- many (newline <|> pComment)
+    name <- pField "Name" anyChar
+    _ <- many (newline <|> pComment)
+    icon <- pField "Icon" anyChar
+    _ <- many (newline <|> pComment)
+    quantity <- pField "Quantity" pQuantity
+    _ <- many (newline <|> pComment)
+    temperature <- pField "Temperature" pTemperature
+    _ <- many (newline <|> pComment)
+    time <- pField "Time" pTime
+    _ <- many (newline <|> pComment)
+    cafeine <- pField "Cafeine" pPercentage
+    _ <- many (newline <|> pComment)
+
+    let aFamily = F.Family name icon (head quantity) (head temperature) (head time) (head cafeine)
+
     return aFamily
 
-field s r = string s *> spaces *> string ":" *> spaces *> manyTill r (try newline)
+pField s r = string s *> spaces *> string ":" *> spaces *> manyTill r (try $ newline <|> pComment)
 
-pQuantity = do
-    value <- many (noneOf " ") <* spaces <* string "tsp"
-    return . Tsp . read $ value
+pComment = spaces *> char '#' <* manyTill anyChar (try newline)
 
-pTemperature = pCelsius <|> pFahrenheit
+pInt = do
+    int <- many digit
+    return (read int :: Int)
+
+pDouble = do
+    int <- many digit
+    prec <- optionMaybe (char '.' *> digit <* many digit)
+    let val = int ++ case prec of
+                         Nothing -> []
+                         Just v -> '.':[v]
+    return (read val :: Double)
+
+pQuantity = choice [try pTspDl, try pTspOz]
+    where pTspDl = do
+                value <- pDouble <* spaces <* string "tsp/dl" <* optional (char '.')
+                return . U.TspDl $ value
+          pTspOz = do
+                value <- pDouble <* spaces <* string "tsp/8oz" <* optional (char '.')
+                return . U.TspOz $ value
+
+pTemperature = choice [try pCelsius, try pFahrenheit]
     where pCelsius = do
-              value <- many digit <* spaces <* string "C"
-              return . Celsius . read $ value
+              value <- pInt <* spaces <* string "°C"
+              return . U.Celsius $ value
           pFahrenheit = do
-              value <- many digit <* spaces <* string "F"
-              return . Fahrenheit . read $ value
+              value <- pInt <* spaces <* string "°F"
+              return . U.Fahrenheit $ value
 
 pTime = do
-    value <- many digit <* spaces <* string "s."
-    return . Second . read $ value
+    value <- pInt <* spaces <* string "s" <* optional (char '.')
+    return . U.Second $ value
 
 pPercentage = do
-    value <- many digit <* spaces <* string "%"
-    return . Just . Percent . read $ value
+    value <- pInt <* spaces <* char '%'
+    return . Just . U.Percent $ value
 
