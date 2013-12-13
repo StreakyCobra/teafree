@@ -31,10 +31,10 @@ import Teafree.Interaction.PPrint
 printList :: String -> Teafree ()
 printList "teas" = do
     content <- ask
-    liftIO $ putStrLn . unlines . map show $ get teas content
+    liftIO $ putStr . unlines . map (show . pprint True) $ get teas content
 
 printList "families" = do
     content <- ask
-    liftIO $ putStrLn . unlines . map (show . pprint True) $ get families content
+    liftIO $ putStr . unlines . map (show . pprint True) $ get families content
 
 printList w = failure $ "There is no list of \"" ++ w ++ "\""

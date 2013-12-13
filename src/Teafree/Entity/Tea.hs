@@ -51,7 +51,11 @@ instance PPrint Tea where
     ppName c v = i (bold . dullred) $ text . get name $ v
             where i f = if c then f else id
 
-    ppDetails c t = case get production t of
+    ppDetails c t = text (printf "%-15s" "Family:") <+> case get fam t of
+                                                            Left _ -> (i (bold . dullred)) . text $ "/!\\ Wrong family"
+                                                            Right v -> (i (bold . dullgreen) . text . get F.name $ v)
+                     <$>
+                    case get production t of
                         Nothing -> empty
                         Just v -> text (printf "%-15s" "Production:") <+> (i (bold . dullblue) . text $ v) <$> empty
                     <>
@@ -62,6 +66,7 @@ instance PPrint Tea where
                         case (cafeine t) of
                             Just v -> pprint c v <+> text "of coffee"
                             Nothing -> i yellow $ text "Unknown"
+                    <$> empty
             where i f = if c then f else id
 
     ppSummary c v = text (get name v) <+> text " (" <>

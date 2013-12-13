@@ -56,6 +56,7 @@ instance PPrint Family where
                         case (get cafeine v) of
                             Just t -> (pprint c t) <+> text "of coffee"
                             Nothing -> (i yellow) (text "Unknown")
+                    <$> empty
             where i f = if c then f else id
 
     ppSummary c v = text (get name v) <+> text " (" <>

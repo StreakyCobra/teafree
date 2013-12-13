@@ -33,8 +33,8 @@ import Teafree.Core.Monad
 import Teafree.Interaction.PPrint
 import Teafree.Interaction.Choice
 import Teafree.Interaction.Notify as N
-import Teafree.Entity.Family as F
-import Teafree.Entity.Units as F
+import Teafree.Entity.Tea as Tea
+import Teafree.Entity.Units
 
 import Data.Text as T
 default (T.Text)
@@ -43,15 +43,15 @@ default (T.Text)
 {- Prepare a tea -}
 prepare :: Teafree ()
 prepare = do
-    choice <- chooseFamily
+    choice <- chooseTea
 
     case choice of
         Nothing -> sendError "The selected item is not found"
-        Just f -> do
-            liftIO . threadDelay . (*1000000) . toSeconds $ get F.time f
-            send $ def title (T.pack . show . ppName False $ f)
+        Just t -> do
+            liftIO . threadDelay . (*1000000) . toSeconds $ Tea.time t
+            send $ def title (T.pack . show . ppName False $ t)
                  . def body (T.pack "Your tea is ready")
-                 . def N.icon (T.pack $ get F.icon f)
+                 . def N.icon (T.pack $ Tea.icon t)
                  . def duration 0
                  . def urgency (T.pack "critical")
                  $ notification

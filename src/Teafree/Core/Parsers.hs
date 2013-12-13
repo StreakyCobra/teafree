@@ -35,18 +35,12 @@ pTeasFile = many pTea <* eof
 pTea = do
     _ <- many (softNewline <|> pComment)
     name <- pField "Name" (many $ noneOf "\n#")
-    _ <- many (softNewline <|> pComment)
     fam <- pField "Family" (many $ noneOf "\n#")
-    _ <- many (softNewline <|> pComment)
-    production <- optionMaybe $ pField "Production" (many $ noneOf "\n#")
-    _ <- many (softNewline <|> pComment)
-    quantity <- optionMaybe $ pField "Quantity" pQuantity
-    _ <- many (softNewline <|> pComment)
-    temperature <- optionMaybe $ pField "Temperature" pTemperature
-    _ <- many (softNewline <|> pComment)
-    time <- optionMaybe $ pField "Time" pTime
-    _ <- many (softNewline <|> pComment)
-    cafeine <- optionMaybe $ pField "Cafeine" pPercentage
+    production <- optionMaybe . try $ pField "Production" (many $ noneOf "\n#")
+    quantity <- optionMaybe . try $ pField "Quantity" pQuantity
+    temperature <- optionMaybe . try $ pField "Temperature" pTemperature
+    time <- optionMaybe . try $ pField "Time" pTime
+    cafeine <- optionMaybe . try $ pField "Cafeine" pPercentage
     _ <- many (softNewline <|> pComment)
 
     let aTea = T.Tea name (Left fam) production quantity temperature time cafeine
