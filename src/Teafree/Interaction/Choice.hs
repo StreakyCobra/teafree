@@ -23,6 +23,7 @@
 module Teafree.Interaction.Choice
     ( chooseTea
     , chooseFamily
+    , forName
     ) where
 
 

@@ -1,0 +1,7 @@
+Name        : Bai Mu Dan Supérieur
+Family      : White
+Production  : Fujian Chine
+Quantity    : 2 tsp/dl
+Temperature : 80 C
+Time        : 4 s.
+Cafeine     : 12%

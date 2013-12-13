@@ -32,6 +32,7 @@ module Teafree.Core.Environment
 
 
 import Data.Label
+import Data.List
 import Control.Monad
 import System.Directory
 import System.Environment (lookupEnv)
@@ -56,28 +57,39 @@ defaultEnvironment = Environment [] []
 getEnvironment :: IO Environment
 getEnvironment = do
     fContent <- getOrCopyConfigFileName "families.txt" >>= readFile
-    --tContent <- getOrCopyConfigFileName "teas.txt" >>= readFile
+    tContent <- getOrCopyConfigFileName "teas.txt" >>= readFile
 
     let fParsed = parseFamilies fContent
-    --let tParsed = parseTeas tContent
+    let tParsed = parseTeas tContent
 
     let fs = case fParsed of
                  Left _ -> []
                  Right xs -> xs
 
-    --let ts = case tParsed of
-    --             Left m -> []
-    --             Right xs -> xs
+    let ts = case tParsed of
+                 Left m -> []
+                 Right xs -> xs
 
     cfs <- mapM correctIcon fs
+    cts <- mapM (correctFamily cfs) ts
 
-    return . set families cfs $ defaultEnvironment
+    return . set teas cts . set families cfs $ defaultEnvironment
 
 correctIcon :: Family -> IO Family
 correctIcon f = do
-    nIcon <- getDataFileName $ get icon f
-    let nFam = set icon nIcon f
+    nIcon <- getDataFileName $ get F.icon f
+    let nFam = set F.icon nIcon f
     return nFam
+
+correctFamily :: [Family] -> Tea -> IO Tea
+correctFamily fs t = do
+    case get fam t of
+        Left n -> do
+            let nFam = find ((==n) . get F.name) fs
+            case nFam of
+                Nothing -> return t
+                Just f -> return $ set fam (Right f) t
+        Right _ -> return t
 
 getConfigDirectory :: IO FilePath
 getConfigDirectory = do

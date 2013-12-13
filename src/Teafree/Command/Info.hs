@@ -32,7 +32,7 @@ import Teafree.Core.Monad
 import Teafree.Interaction.PPrint
 import Teafree.Interaction.Notify as N
 import Teafree.Interaction.Choice
-import Teafree.Entity.Family as F
+import Teafree.Entity.Tea as Tea
 
 import Data.Text as T
 default (T.Text)
@@ -41,13 +41,13 @@ default (T.Text)
 {- Information about a tea -}
 info :: Teafree ()
 info = do
-    choice <- chooseFamily
+    choice <- chooseTea
 
     case choice of
-        Nothing -> sendError "The selected item is not found"
-        Just f -> send $ def title (T.pack . show . ppName False $ f)
-                      . def body (T.pack . show . ppDetails False $ f)
-                      . def N.icon (T.pack $ get F.icon f)
+        Nothing -> sendError "The selected tea is not found"
+        Just t -> send $ def title (T.pack . show . ppName False $ t)
+                      . def body (T.pack . show . ppDetails False $ t)
+                      . def N.icon (T.pack $ Tea.icon t)
                       . def duration 0
                       . def urgency "normal"
                       $ notification
