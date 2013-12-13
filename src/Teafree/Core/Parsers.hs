@@ -33,21 +33,21 @@ parseTeas = parse pTeasFile ""
 pTeasFile = many pTea <* eof
 
 pTea = do
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
     name <- pField "Name" anyChar
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
     fam <- pField "Family" anyChar
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
     production <- optionMaybe $ pField "Production" pQuantity
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
     quantity <- pField "Quantity" pTemperature
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
     temperature <- pField "Temperature" pTemperature
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
     time <- pField "Time" pTime
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
     cafeine <- optionMaybe $ pField "Cafeine" pPercentage
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
 
     let aTea = undefined
 
@@ -59,25 +59,25 @@ parseFamilies = parse pFamiliesFile ""
 pFamiliesFile = many pFamily <* eof
 
 pFamily = do
-    _ <- many (newline <|> pComment)
-    name <- pField "Name" anyChar
-    _ <- many (newline <|> pComment)
-    icon <- pField "Icon" anyChar
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
+    name <- pField "Name" (many $ noneOf "\n#")
+    _ <- many (softNewline <|> pComment)
+    icon <- pField "Icon" (many $ noneOf "\n#")
+    _ <- many (softNewline <|> pComment)
     quantity <- pField "Quantity" pQuantity
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
     temperature <- pField "Temperature" pTemperature
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
     time <- pField "Time" pTime
-    _ <- many (newline <|> pComment)
-    cafeine <- pField "Cafeine" pPercentage
-    _ <- many (newline <|> pComment)
+    _ <- many (softNewline <|> pComment)
+    cafeine <- optionMaybe $ pField "Cafeine" pPercentage
+    _ <- many (softNewline <|> pComment)
 
-    let aFamily = F.Family name icon (head quantity) (head temperature) (head time) (head cafeine)
+    let aFamily = F.Family name icon quantity temperature time cafeine
 
     return aFamily
 
-pField s r = string s *> spaces *> string ":" *> spaces *> manyTill r (try $ newline <|> pComment)
+pField s r = string s *> spaces *> string ":" *> spaces *> r <* (try pComment <|> softNewline)
 
 pComment = spaces *> char '#' <* manyTill anyChar (try newline)
 
@@ -115,5 +115,6 @@ pTime = do
 
 pPercentage = do
     value <- pInt <* spaces <* char '%'
-    return . Just . U.Percent $ value
+    return . U.Percent $ value
 
+softNewline = many (oneOf " \t") >> newline
