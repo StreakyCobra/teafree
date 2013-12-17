@@ -133,8 +133,37 @@ pTemperature = choice [try pCelsius, try pFahrenheit]
 
 pTime :: Parser U.Time
 pTime = do
+    h <- optionMaybe . try $ pHour
+    pSpaces
+    m <- optionMaybe . try $ pMinute
+    pSpaces
+    s <- optionMaybe . try $ pSecond
+    let vh = case h of
+                 Nothing -> 0
+                 Just v -> v
+    let mh = case m of
+                 Nothing -> 0
+                 Just v -> v
+    let sh = case s of
+                 Nothing -> 0
+                 Just v -> v
+    return . U.Second $ vh + mh + sh
+
+pHour :: Parser Int
+pHour = do
+    value <- pInt <* pSpaces <* string "h" <* optional (char '.')
+    return . (*3600) $ value
+
+pMinute :: Parser Int
+pMinute = do
+    value <- pInt <* pSpaces <* string "m" <* optional (char '.')
+    return . (*60) $ value
+
+pSecond :: Parser Int
+pSecond = do
     value <- pInt <* pSpaces <* string "s" <* optional (char '.')
-    return . U.Second $ value
+    return . (*1) $ value
+
 
 pPercentage :: Parser U.Percentage
 pPercentage = do
