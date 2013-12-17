@@ -13,6 +13,7 @@ copyright:           2013 Fabien Dubosson
 build-type:          Simple
 extra-source-files:  README.md
 data-files:          images/*.png,
+                     config,
                      families.txt,
                      teas.txt
 cabal-version:       >=1.10

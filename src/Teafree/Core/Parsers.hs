@@ -17,10 +17,13 @@
 
 -}
 
+{-# LANGUAGE TemplateHaskell #-}
+
 module Teafree.Core.Parsers where
 
 
 import Control.Applicative ((<*), (*>), (<$>), pure)
+import Data.Label
 import Text.Parsec
 import Text.Parsec.Text
 
@@ -31,6 +34,48 @@ import qualified Teafree.Entity.Units as U
 import Data.Text as T
 default (T.Text)
 
+fclabels [d|
+    data CConfig = CConfig
+        { cQuantity     :: U.Quantity -> U.Quantity
+        , cTemperature  :: U.Temperature -> U.Temperature
+        }
+    |]
+
+parseConfig :: Text -> Either ParseError CConfig
+parseConfig = parse pConfigFile ""
+
+pConfigFile :: Parser CConfig
+pConfigFile = pConfig <* eof
+
+pConfig :: Parser CConfig
+pConfig = do
+    quantity <- pField "Quantity" pQuantityTo
+    temperature <- pField "Temperature" pTemperatureTo
+    skipMany eol
+
+    let cConfig = CConfig quantity temperature
+
+    return cConfig
+
+parseFamilies :: Text -> Either ParseError [Fam.Family]
+parseFamilies = parse pFamiliesFile ""
+
+pFamiliesFile :: Parser [Fam.Family]
+pFamiliesFile = many pFamily <* eof
+
+pFamily :: Parser Fam.Family
+pFamily = do
+    name <- pField "Name" pText
+    icon <- pField "Icon" pText
+    quantity <- pField "Quantity" pQuantity
+    temperature <- pField "Temperature" pTemperature
+    time <- pField "Time" pTime
+    cafeine <- optionMaybe . try $ pField "Cafeine" pPercentage
+    skipMany eol
+
+    let aFamily = Fam.Family name icon quantity temperature time cafeine
+
+    return aFamily
 
 parseTeas :: Text -> Either ParseError [Tea.Tea]
 parseTeas = parse pTeasFile ""
@@ -53,26 +98,6 @@ pTea = do
     let aTea = Tea.Tea name (Left fam) production quantity temperature time cafeine note
 
     return aTea
-
-parseFamilies :: Text -> Either ParseError [Fam.Family]
-parseFamilies = parse pFamiliesFile ""
-
-pFamiliesFile :: Parser [Fam.Family]
-pFamiliesFile = many pFamily <* eof
-
-pFamily :: Parser Fam.Family
-pFamily = do
-    name <- pField "Name" pText
-    icon <- pField "Icon" pText
-    quantity <- pField "Quantity" pQuantity
-    temperature <- pField "Temperature" pTemperature
-    time <- pField "Time" pTime
-    cafeine <- optionMaybe . try $ pField "Cafeine" pPercentage
-    skipMany eol
-
-    let aFamily = Fam.Family name icon quantity temperature time cafeine
-
-    return aFamily
 
 (<||>) :: Parser a -> Parser a -> Parser a
 a <||> b = try a <|> b
@@ -113,10 +138,16 @@ pDouble = do
                          Just v -> '.':[v]
     return (read val :: Double)
 
+pQuantityTo :: Parser (U.Quantity -> U.Quantity)
+pQuantityTo = (string "2dl" >> pure U.toDl) <||> (string "8oz" >> pure U.toOz)
+
+pTemperatureTo :: Parser (U.Temperature -> U.Temperature)
+pTemperatureTo = (string "C" >> pure U.toC) <||> (string "F" >> pure U.toF)
+
 pQuantity :: Parser U.Quantity
 pQuantity = choice [try pTspDl, try pTspOz]
     where pTspDl = do
-                value <- pDouble <* pSpaces <* string "tsp/dl" <* optional (char '.')
+                value <- pDouble <* pSpaces <* string "tsp/2dl" <* optional (char '.')
                 return . U.TspDl $ value
           pTspOz = do
                 value <- pDouble <* pSpaces <* string "tsp/8oz" <* optional (char '.')

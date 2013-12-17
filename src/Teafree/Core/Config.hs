@@ -40,11 +40,17 @@ default (T.Text)
 
 getEnvironment :: Teafree Environment
 getEnvironment = do
+    cContent <- liftIO $ getOrCopyConfigFileName "config" >>= TIO.readFile
     fContent <- liftIO $ getOrCopyConfigFileName "families.txt" >>= TIO.readFile
     tContent <- liftIO $ getOrCopyConfigFileName "teas.txt" >>= TIO.readFile
 
+    let cParsed = parseConfig cContent
     let fParsed = parseFamilies fContent
     let tParsed = parseTeas tContent
+
+    cs <- case cParsed of
+             Left e -> failure $ "Problem when parsing configuration:\n\n" ++ show e
+             Right xs -> return xs
 
     fs <- case fParsed of
              Left e -> failure $ "Problem when parsing families:\n\n" ++ show e
@@ -54,28 +60,46 @@ getEnvironment = do
              Left e -> failure $ "Problem when parsing teas:\n\n" ++ show e
              Right xs -> return xs
 
-    cfs <- mapM (correctFamily) fs
-    cts <- mapM (correctTea cfs) ts
+    let env = set quantityTo (get cQuantity cs)
+            . set temperatureTo (get cTemperature cs)
+            $ defaultEnvironment
 
-    return . set teas cts . set families cfs $ defaultEnvironment
+    nfs <- mapM (correctFamily env) fs
+    nts <- mapM (correctTea env nfs) ts
 
-correctTea :: [Family] -> Tea -> Teafree Tea
-correctTea fs t = do
-    case get fam t of
-        Left n -> do
-            let nFam = DL.find ((==n) . get F.name) fs
-            case nFam of
-                Nothing -> failure $ "The family \"" ++ (T.unpack n) ++ "\" doesn't exist"
-                Just f -> return $ set fam (Right f) t
-        Right _ -> return t
+    return $ set teas nts
+           . set families nfs
+           $ env
 
-correctFamily :: Family -> Teafree Family
-correctFamily f = do
-    env <- ask
+correctTea :: Environment -> [Family] -> Tea -> Teafree Tea
+correctTea env fs t = do
+    let funcQ = get quantityTo env
+    let funcT = get temperatureTo env
+    nFam <- case get Tea.fam t of
+               Left n -> do
+                   let res = DL.find ((==n) . get F.name) fs
+                   case res of
+                       Nothing -> failure $ "The family \"" ++ (T.unpack n) ++ "\" doesn't exist"
+                       Just f -> return f
+               Right f -> return f
+    return . set Tea._quantity (case get Tea._quantity t of
+                                    Nothing -> Nothing
+                                    Just v -> Just . funcQ $ v)
+           . set Tea._temperature (case get Tea._temperature t of
+                                       Nothing -> Nothing
+                                       Just v -> Just . funcT $ v)
+           . set Tea.fam (Right nFam)
+           $ t
+
+correctFamily :: Environment -> Family -> Teafree Family
+correctFamily env f = do
     let funcQ = get quantityTo env
     let funcT = get temperatureTo env
     nIcon <- liftIO $ getDataFileName $ T.unpack $ get F.icon f
-    return . modify F.quantity funcQ . modify F.temperature funcT . set F.icon (T.pack nIcon) $ f
+    return . modify F.quantity funcQ
+           . modify F.temperature funcT
+           . set F.icon (T.pack nIcon)
+           $ f
 
 getConfigDirectory :: IO FilePath
 getConfigDirectory = do

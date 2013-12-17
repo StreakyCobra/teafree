@@ -73,7 +73,7 @@ instance PPrint Temperature where
     ppSummary = pprint
 
 instance PPrint Quantity where
-    pprint c (TspDl v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp/dl")
+    pprint c (TspDl v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp/2dl")
             where i f = if c then f else id
 
     pprint c (TspOz v) = (i (bold . dullblue) . text . show $ v) <+> (text "tsp/8oz")
@@ -117,11 +117,11 @@ toSeconds (Second s) = s
 
 toDl :: Quantity -> Quantity
 toDl (TspDl v) = TspDl v
-toDl (TspOz v) = TspDl v
+toDl (TspOz v) = TspDl . (/10) . fromIntegral . roundTo 5 . round . (*10) . (/1.18) $ v
 
 toOz :: Quantity -> Quantity
 toOz (TspOz v) = TspOz v
-toOz (TspDl v) = TspOz v
+toOz (TspDl v) = TspOz . (/10) . fromIntegral . roundTo 5 . round . (*10) . (*1.18) $ v
 
 toF :: Temperature -> Temperature
 toF (Fahrenheit v) = Fahrenheit v

@@ -61,5 +61,5 @@ fclabels [d|
     |]
 
 defaultEnvironment :: Environment
-defaultEnvironment = Environment [] [] U.toDl U.toC
+defaultEnvironment = Environment [] [] id id
 
