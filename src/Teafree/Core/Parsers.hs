@@ -20,8 +20,8 @@
 module Teafree.Core.Parsers where
 
 
-import Text.Parsec
-import Control.Applicative ((<*), (*>))
+import Text.ParserCombinators.Parsec
+import Control.Applicative ((<*), (*>), (<$>))
 
 import qualified Teafree.Entity.Family as F
 import qualified Teafree.Entity.Tea as T
@@ -30,8 +30,10 @@ import qualified Teafree.Entity.Units as U
 parseTeas :: String -> Either ParseError [T.Tea]
 parseTeas = parse pTeasFile ""
 
+pTeasFile :: Parser [T.Tea]
 pTeasFile = many pTea <* eof
 
+pTea :: Parser T.Tea
 pTea = do
     _ <- many (softNewline <|> pComment)
     name <- pField "Name" (many $ noneOf "\n#")
@@ -50,20 +52,17 @@ pTea = do
 parseFamilies :: String -> Either ParseError [F.Family]
 parseFamilies = parse pFamiliesFile ""
 
+pFamiliesFile :: Parser [F.Family]
 pFamiliesFile = many pFamily <* eof
 
+pFamily :: Parser F.Family
 pFamily = do
     _ <- many (softNewline <|> pComment)
     name <- pField "Name" (many $ noneOf "\n#")
-    _ <- many (softNewline <|> pComment)
     icon <- pField "Icon" (many $ noneOf "\n#")
-    _ <- many (softNewline <|> pComment)
     quantity <- pField "Quantity" pQuantity
-    _ <- many (softNewline <|> pComment)
     temperature <- pField "Temperature" pTemperature
-    _ <- many (softNewline <|> pComment)
     time <- pField "Time" pTime
-    _ <- many (softNewline <|> pComment)
     cafeine <- optionMaybe $ pField "Cafeine" pPercentage
     _ <- many (softNewline <|> pComment)
 
@@ -71,14 +70,16 @@ pFamily = do
 
     return aFamily
 
+pField :: String -> Parser a -> Parser a
 pField s r = string s *> spaces *> string ":" *> spaces *> r <* (try pComment <|> softNewline)
 
+pComment :: Parser Char
 pComment = spaces *> char '#' <* manyTill anyChar (try newline)
 
-pInt = do
-    int <- many digit
-    return (read int :: Int)
+pInt :: Parser Int
+pInt = read <$> many1 digit
 
+pDouble :: Parser Double
 pDouble = do
     int <- many digit
     prec <- optionMaybe (char '.' *> digit <* many digit)
@@ -87,6 +88,7 @@ pDouble = do
                          Just v -> '.':[v]
     return (read val :: Double)
 
+pQuantity :: Parser U.Quantity
 pQuantity = choice [try pTspDl, try pTspOz]
     where pTspDl = do
                 value <- pDouble <* spaces <* string "tsp/dl" <* optional (char '.')
@@ -95,6 +97,7 @@ pQuantity = choice [try pTspDl, try pTspOz]
                 value <- pDouble <* spaces <* string "tsp/8oz" <* optional (char '.')
                 return . U.TspOz $ value
 
+pTemperature :: Parser U.Temperature
 pTemperature = choice [try pCelsius, try pFahrenheit]
     where pCelsius = do
               value <- pInt <* spaces <* string "°C"
@@ -103,12 +106,15 @@ pTemperature = choice [try pCelsius, try pFahrenheit]
               value <- pInt <* spaces <* string "°F"
               return . U.Fahrenheit $ value
 
+pTime :: Parser U.Time
 pTime = do
     value <- pInt <* spaces <* string "s" <* optional (char '.')
     return . U.Second $ value
 
+pPercentage :: Parser U.Percentage
 pPercentage = do
     value <- pInt <* spaces <* char '%'
     return . U.Percent $ value
 
+softNewline :: Parser Char
 softNewline = many (oneOf " \t") >> newline
