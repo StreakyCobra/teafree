@@ -27,6 +27,9 @@ module Teafree.Core.Monad
     , ask
     , failure
     , return
+    , catchAny
+    , abort
+    , throwError
     ) where
 
 
@@ -45,4 +48,10 @@ runTeafree t = runReaderT $ runErrorT (runT t)
 
 failure :: String -> Teafree t
 failure = throwError . strMsg
+
+abort :: Teafree t
+abort = throwError Aborted
+
+catchAny :: Teafree t -> (TeafreeError -> Teafree t) -> Teafree t
+catchAny = catchError
 

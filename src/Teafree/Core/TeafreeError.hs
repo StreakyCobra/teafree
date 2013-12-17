@@ -18,13 +18,16 @@
 
 -}
 
-module Teafree.Core.TeafreeError where
+module Teafree.Core.TeafreeError
+    ( TeafreeError(..)
+    , getErrorMsg
+    ) where
 
 
 import Control.Monad.Error
 
 
-data TeafreeError = M String
+data TeafreeError = M String | Aborted
     deriving (Eq, Show)
 
 instance Error TeafreeError where
@@ -33,4 +36,5 @@ instance Error TeafreeError where
 
 getErrorMsg :: TeafreeError -> String
 getErrorMsg (M m) = m
+getErrorMsg (Aborted) = "Aborted"
 

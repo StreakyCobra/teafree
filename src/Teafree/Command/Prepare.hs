@@ -28,12 +28,11 @@ module Teafree.Command.Prepare
 import Control.Concurrent
 import Shelly hiding (get)
 
-import Teafree.Core.Environment
 import Teafree.Core.Monad
 import Teafree.Interaction.PPrint
 import Teafree.Interaction.Choice
-import Teafree.Interaction.Notify as N
-import Teafree.Entity.Tea as Tea
+import Teafree.Interaction.Notify
+import qualified Teafree.Entity.Tea as Tea
 import Teafree.Entity.Units
 
 import Data.Text as T
@@ -45,14 +44,11 @@ prepare :: Teafree ()
 prepare = do
     choice <- chooseTea
 
-    case choice of
-        Nothing -> sendError "The selected item is not found"
-        Just t -> do
-            liftIO . threadDelay . (*1000000) . toSeconds $ Tea.time t
-            send $ def title (T.pack . show . ppName False $ t)
-                 . def body ("Your tea is ready")
-                 . def N.icon (Tea.icon t)
-                 . def duration 0
-                 . def urgency (T.pack "critical")
-                 $ notification
+    liftIO . threadDelay . (*1000000) . toSeconds $ Tea.time choice
+    send $ def title (T.pack . show . ppName False $ choice)
+         . def body ("Your tea is ready")
+         . def icon (Tea.icon choice)
+         . def duration 0
+         . def urgency "critical"
+         $ notification
 

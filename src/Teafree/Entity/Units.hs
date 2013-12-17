@@ -83,13 +83,13 @@ instance PPrint Time where
                           let (m, s) = quotRem hr 60 in
                           case h of
                               0 -> empty
-                              v -> (i (bold . dullblue) . text . show $ v) <+> (text "h ")
+                              p -> (i (bold . dullblue) . text . show $ p) <+> (text "h ")
                           <> case m of
                               0 -> empty
-                              v -> (i (bold . dullblue) . text . show $ v) <+> (text "m ")
+                              p -> (i (bold . dullblue) . text . show $ p) <+> (text "m ")
                           <> case s of
                               0 -> empty
-                              v -> (i (bold . dullblue) . text . show $ v) <+> (text "s")
+                              p -> (i (bold . dullblue) . text . show $ p) <+> (text "s")
             where i f = if c then f else id
 
     ppName = pprint

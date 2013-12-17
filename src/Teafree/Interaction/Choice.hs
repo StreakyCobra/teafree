@@ -27,7 +27,6 @@ module Teafree.Interaction.Choice
     ) where
 
 
-import Control.Exception
 import Data.Label
 import Data.List as DL
 import Shelly hiding (get)
@@ -35,39 +34,41 @@ import Shelly hiding (get)
 import Teafree.Core.Monad
 import Teafree.Core.Environment
 
-import Teafree.Entity.Family as Fam
-import Teafree.Entity.Tea as Tea
+import qualified Teafree.Entity.Family as Fam
+import qualified Teafree.Entity.Tea as Tea
 
 import Data.Text as T hiding (map)
 default (T.Text)
 
 
-chooseTea :: Teafree (Maybe Tea)
+chooseTea :: Teafree Tea.Tea
 chooseTea = chooseItem teas (get Tea.name)
 
-chooseFamily :: Teafree (Maybe Family)
+chooseFamily :: Teafree Fam.Family
 chooseFamily = chooseItem families (get Fam.name)
 
-chooseItem :: (Environment :-> [a]) -> (a -> Text) -> Teafree (Maybe a)
+chooseItem :: (Environment :-> [a]) -> (a -> Text) -> Teafree a
 chooseItem a f = do
     env <- ask
     choice <- chooseText . listToText f $ get a env
     case choice of
-        "" -> return Nothing
-        _ -> forName a f $ T.init $ choice
+        "" -> abort
+        _ -> forName a f $ T.init choice
 
 chooseText :: Text -> Teafree Text
-chooseText t = shellyNoDir $ silently $ print_stdout False $ return t -|- chooser
+chooseText t = liftIO $ catchany (shellyNoDir $ silently $ print_stdout False $ return t -|- chooser)
+                                 (\_ -> return "")
 
 chooser :: Sh Text
-chooser = catch_sh
-            (run "dmenu" ["-i", "-p", "teafree:", "-l", "10"])
-            ((\_ -> return "") :: SomeException -> Sh Text)
+chooser = run "dmenu" ["-i", "-p", "teafree:", "-l", "10"]
 
-forName :: (Environment :-> [a]) -> (a -> Text) -> Text -> Teafree (Maybe a)
+forName :: (Environment :-> [a]) -> (a -> Text) -> Text -> Teafree a
 forName a f s = do
     env <- ask
-    return . DL.find ((==s) . f) $ get a env
+    let result = DL.find ((==s) . f) $ get a env
+    case result of
+        Nothing -> failure $ "The item with name \"" ++ T.unpack s ++ "\" doesn't exist"
+        Just v -> return v
 
 listToText :: (a -> Text) -> [a] -> Text
 listToText f = T.unlines . map f

@@ -20,7 +20,7 @@
 module Teafree.Core.Parsers where
 
 
-import Control.Applicative ((<*), (*>), (<*>), (<$>), pure)
+import Control.Applicative ((<*), (*>), (<$>), pure)
 import Text.Parsec
 import Text.Parsec.Text
 

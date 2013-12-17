@@ -71,7 +71,7 @@ getEnvironment = do
                  Right xs -> xs
 
     let ts = case tParsed of
-                 Left m -> []
+                 Left _ -> []
                  Right xs -> xs
 
     cfs <- mapM correctIcon fs

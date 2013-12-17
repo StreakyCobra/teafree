@@ -27,8 +27,6 @@ import Teafree.Core.Environment
 import Teafree.Core.Monad
 import Teafree.Interaction.PPrint
 
-import Text.PrettyPrint.ANSI.Leijen
-
 
 printList :: String -> Teafree ()
 printList "teas" = do

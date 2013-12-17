@@ -28,6 +28,7 @@ module Teafree.Command.Info
 import Prelude as P
 
 import Teafree.Core.Monad
+import Teafree.Core.TeafreeError
 
 import Teafree.Interaction.PPrint
 import Teafree.Interaction.Notify as N
@@ -42,14 +43,17 @@ default (T.Text)
 {- Information about a tea -}
 info :: Teafree ()
 info = do
-    choice <- chooseTea
+    choice <- chooseTea `catchAny` (\e -> case e of
+                                            Aborted -> abort
+                                            M m -> do
+                                                  sendError . T.pack $ m
+                                                  throwError e
+                                   )
 
-    case choice of
-        Nothing -> sendError "The selected tea is not found"
-        Just t -> send . def title (T.pack . show . ppName False $ t)
-                      . def body (T.pack . show . ppDetails False $ t)
-                      . def icon (Tea.icon t)
-                      . def duration 0
-                      . def urgency "normal"
-                      $ notification
+    send . def title (T.pack . show . ppName False $ choice)
+         . def body (T.pack . show . ppDetails False $ choice)
+         . def icon (Tea.icon choice)
+         . def duration 0
+         . def urgency "normal"
+         $ notification
 
