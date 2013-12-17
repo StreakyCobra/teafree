@@ -28,7 +28,6 @@ module Teafree.Command.Info
 import Prelude as P
 
 import Teafree.Core.Monad
-import Teafree.Core.TeafreeError
 
 import Teafree.Interaction.PPrint
 import Teafree.Interaction.Notify as N
@@ -43,12 +42,7 @@ default (T.Text)
 {- Information about a tea -}
 info :: Teafree ()
 info = do
-    choice <- chooseTea `catchAny` (\e -> case e of
-                                            Aborted -> abort
-                                            M m -> do
-                                                  sendError . T.pack $ m
-                                                  throwError e
-                                   )
+    choice <- chooseTea `catchAny` sendTeafreeError
 
     send . def title (T.pack . show . ppName False $ choice)
          . def body (T.pack . show . ppDetails False $ choice)

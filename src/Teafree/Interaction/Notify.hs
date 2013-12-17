@@ -31,6 +31,7 @@ module Teafree.Interaction.Notify
     , urgency
     , category
     , sendError
+    , sendTeafreeError
     ) where
 
 
@@ -39,6 +40,7 @@ import Prelude as P
 import Shelly hiding (get)
 
 import Teafree.Core.Monad
+import Teafree.Core.TeafreeError
 
 import Data.Text as T
 default (T.Text)
@@ -91,4 +93,10 @@ sendError m = send $ def title "Error"
                . def icon "dialog-warning"
                . def duration 5
                $ notification
+
+sendTeafreeError :: TeafreeError -> Teafree t
+sendTeafreeError Aborted = abort
+sendTeafreeError e@(M m) = do
+        sendError . T.pack $ m
+        throwError e
 

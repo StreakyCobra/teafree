@@ -29,11 +29,13 @@ import Control.Concurrent
 import Shelly hiding (get)
 
 import Teafree.Core.Monad
+
 import Teafree.Interaction.PPrint
 import Teafree.Interaction.Choice
 import Teafree.Interaction.Notify
-import qualified Teafree.Entity.Tea as Tea
+
 import Teafree.Entity.Units
+import qualified Teafree.Entity.Tea as Tea
 
 import Data.Text as T
 default (T.Text)
@@ -42,9 +44,10 @@ default (T.Text)
 {- Prepare a tea -}
 prepare :: Teafree ()
 prepare = do
-    choice <- chooseTea
+    choice <- chooseTea `catchAny` sendTeafreeError
 
     liftIO . threadDelay . (*1000000) . toSeconds $ Tea.time choice
+
     send $ def title (T.pack . show . ppName False $ choice)
          . def body ("Your tea is ready")
          . def icon (Tea.icon choice)

@@ -23,7 +23,6 @@
 module Teafree.Interaction.PPrint
     ( Colorized
     , PPrint(..)
-    , showWidth
     ) where
 
 
@@ -55,7 +54,4 @@ instance (PPrint a) => PPrint (Maybe a) where
     ppSummary True Nothing = yellow . text $ undef
     ppSummary False Nothing = text undef
     ppSummary c (Just v) = ppSummary c v
-
-showWidth :: Int -> Doc -> String
-showWidth w x = displayS (renderPretty 0.4 w x) ""
 
