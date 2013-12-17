@@ -59,7 +59,7 @@ instance PPrint Tea where
     ppDetails c t = text (printf "%-15s" "Family:") <+> case get fam t of
                                                             Left _ -> (i (bold . dullred)) . text $ "/!\\ Wrong family"
                                                             Right v -> (i (bold . dullgreen) . text . T.unpack . get F.name $ v)
-                     <$>
+                    <$>
                     case get production t of
                         Nothing -> PP.empty
                         Just v -> text (printf "%-15s" "Production:") <+> (i (bold . dullblue) . text . T.unpack $ v) <$> PP.empty
@@ -95,25 +95,25 @@ quantity t = case (get _quantity t) of
 temperature :: Tea -> Temperature
 temperature t = case (get _temperature t) of
                     Nothing -> case (get fam t) of
-                                   Left _ -> undefined
+                                   Left _ -> error "Wrong family"
                                    Right f -> get F.temperature f
                     Just v -> v
 
 time :: Tea -> Time
 time t = case (get _time t) of
              Nothing -> case (get fam t) of
-                            Left _ -> undefined
+                            Left _ -> error "Wrong family"
                             Right f -> get F.time f
              Just v -> v
 
 cafeine :: Tea -> Maybe Percentage
 cafeine t = case (get _cafeine t) of
                     Nothing -> case (get fam t) of
-                                   Left _ -> undefined
+                                   Left _ -> error "Wrong family"
                                    Right f -> get F.cafeine f
                     v@(Just _) -> v
 
 icon :: Tea -> Text
 icon t = case (get fam t) of
-             Left _ -> undefined
+             Left _ -> error "Wrong family"
              Right f -> get F.icon f

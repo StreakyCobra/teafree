@@ -46,13 +46,13 @@ getEnvironment = do
     let fParsed = parseFamilies fContent
     let tParsed = parseTeas tContent
 
-    let fs = case fParsed of
-                 Left _ -> []
-                 Right xs -> xs
+    fs <- case fParsed of
+             Left e -> failure $ "Problem when parsing families:\n\n" ++ show e
+             Right xs -> return xs
 
-    let ts = case tParsed of
-                 Left _ -> []
-                 Right xs -> xs
+    ts <- case tParsed of
+             Left e -> failure $ "Problem when parsing teas:\n\n" ++ show e
+             Right xs -> return xs
 
     cfs <- mapM correctIcon fs
     cts <- mapM (correctFamily cfs) ts
