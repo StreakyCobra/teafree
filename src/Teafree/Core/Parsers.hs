@@ -20,12 +20,13 @@
 module Teafree.Core.Parsers where
 
 
+import Control.Applicative ((<*), (*>), (<*>), (<$>), pure)
 import Text.ParserCombinators.Parsec
-import Control.Applicative ((<*), (*>), (<$>))
 
 import qualified Teafree.Entity.Family as F
 import qualified Teafree.Entity.Tea as T
 import qualified Teafree.Entity.Units as U
+
 
 parseTeas :: String -> Either ParseError [T.Tea]
 parseTeas = parse pTeasFile ""
@@ -35,15 +36,14 @@ pTeasFile = many pTea <* eof
 
 pTea :: Parser T.Tea
 pTea = do
-    _ <- many (softNewline <|> pComment)
-    name <- pField "Name" (many $ noneOf "\n#")
-    fam <- pField "Family" (many $ noneOf "\n#")
-    production <- optionMaybe . try $ pField "Production" (many $ noneOf "\n#")
+    name <- pField "Name" pString
+    fam <- pField "Family" pString
+    production <- optionMaybe . try $ pField "Production" pString
     quantity <- optionMaybe . try $ pField "Quantity" pQuantity
     temperature <- optionMaybe . try $ pField "Temperature" pTemperature
     time <- optionMaybe . try $ pField "Time" pTime
     cafeine <- optionMaybe . try $ pField "Cafeine" pPercentage
-    _ <- many (softNewline <|> pComment)
+    skipMany eol
 
     let aTea = T.Tea name (Left fam) production quantity temperature time cafeine
 
@@ -57,24 +57,40 @@ pFamiliesFile = many pFamily <* eof
 
 pFamily :: Parser F.Family
 pFamily = do
-    _ <- many (softNewline <|> pComment)
-    name <- pField "Name" (many $ noneOf "\n#")
-    icon <- pField "Icon" (many $ noneOf "\n#")
+    name <- pField "Name" pString
+    icon <- pField "Icon" pString
     quantity <- pField "Quantity" pQuantity
     temperature <- pField "Temperature" pTemperature
     time <- pField "Time" pTime
     cafeine <- optionMaybe $ pField "Cafeine" pPercentage
-    _ <- many (softNewline <|> pComment)
+    skipMany eol
 
     let aFamily = F.Family name icon quantity temperature time cafeine
 
     return aFamily
 
-pField :: String -> Parser a -> Parser a
-pField s r = string s *> spaces *> string ":" *> spaces *> r <* (try pComment <|> softNewline)
+(<||>) :: Parser a -> Parser a -> Parser a
+a <||> b = try a <|> b
 
-pComment :: Parser Char
-pComment = spaces *> char '#' <* manyTill anyChar (try newline)
+ignore :: Parser ()
+ignore = pure ()
+
+eol :: Parser ()
+eol = pComment <||> (pSpaces <* newline)
+
+pSpaces :: Parser ()
+pSpaces = many (oneOf " \t") *> ignore
+
+pComment :: Parser ()
+pComment = char '#' *> manyTill anyChar (try newline) *> ignore
+
+pField :: String -> Parser a -> Parser a
+pField s r = do
+        skipMany eol
+        pSpaces *> string s *> pSpaces *> string ":" *> pSpaces *> r <* pSpaces <* eol
+
+pString :: Parser [Char]
+pString = id <$> many1 (noneOf "\n#")
 
 pInt :: Parser Int
 pInt = read <$> many1 digit
@@ -91,30 +107,28 @@ pDouble = do
 pQuantity :: Parser U.Quantity
 pQuantity = choice [try pTspDl, try pTspOz]
     where pTspDl = do
-                value <- pDouble <* spaces <* string "tsp/dl" <* optional (char '.')
+                value <- pDouble <* pSpaces <* string "tsp/dl" <* optional (char '.')
                 return . U.TspDl $ value
           pTspOz = do
-                value <- pDouble <* spaces <* string "tsp/8oz" <* optional (char '.')
+                value <- pDouble <* pSpaces <* string "tsp/8oz" <* optional (char '.')
                 return . U.TspOz $ value
 
 pTemperature :: Parser U.Temperature
 pTemperature = choice [try pCelsius, try pFahrenheit]
     where pCelsius = do
-              value <- pInt <* spaces <* string "°C"
+              value <- pInt <* pSpaces <* string "°C"
               return . U.Celsius $ value
           pFahrenheit = do
-              value <- pInt <* spaces <* string "°F"
+              value <- pInt <* pSpaces <* string "°F"
               return . U.Fahrenheit $ value
 
 pTime :: Parser U.Time
 pTime = do
-    value <- pInt <* spaces <* string "s" <* optional (char '.')
+    value <- pInt <* pSpaces <* string "s" <* optional (char '.')
     return . U.Second $ value
 
 pPercentage :: Parser U.Percentage
 pPercentage = do
-    value <- pInt <* spaces <* char '%'
+    value <- pInt <* pSpaces <* char '%'
     return . U.Percent $ value
 
-softNewline :: Parser Char
-softNewline = many (oneOf " \t") >> newline
