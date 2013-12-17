@@ -18,6 +18,8 @@
 
 -}
 
+{-# LANGUAGE OverloadedStrings #-}
+
 module Teafree.Interaction.PPrint
     ( Colorized
     , PPrint(..)

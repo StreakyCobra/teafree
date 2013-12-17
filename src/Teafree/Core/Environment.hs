@@ -32,7 +32,7 @@ module Teafree.Core.Environment
 
 
 import Data.Label
-import Data.List
+import Data.List as DL
 import Control.Monad
 import System.Directory
 import System.Environment (lookupEnv)
@@ -41,7 +41,11 @@ import System.FilePath
 import Paths_teafree
 import Teafree.Core.Parsers
 import Teafree.Entity.Family as F
-import Teafree.Entity.Tea as T
+import Teafree.Entity.Tea as Tea
+
+import Data.Text as T
+import Data.Text.IO as TIO
+default (T.Text)
 
 
 fclabels [d|
@@ -56,8 +60,8 @@ defaultEnvironment = Environment [] []
 
 getEnvironment :: IO Environment
 getEnvironment = do
-    fContent <- getOrCopyConfigFileName "families.txt" >>= readFile
-    tContent <- getOrCopyConfigFileName "teas.txt" >>= readFile
+    fContent <- getOrCopyConfigFileName "families.txt" >>= TIO.readFile
+    tContent <- getOrCopyConfigFileName "teas.txt" >>= TIO.readFile
 
     let fParsed = parseFamilies fContent
     let tParsed = parseTeas tContent
@@ -77,15 +81,15 @@ getEnvironment = do
 
 correctIcon :: Family -> IO Family
 correctIcon f = do
-    nIcon <- getDataFileName $ get F.icon f
-    let nFam = set F.icon nIcon f
+    nIcon <- getDataFileName $ T.unpack $ get F.icon f
+    let nFam = set F.icon (T.pack nIcon) f
     return nFam
 
 correctFamily :: [Family] -> Tea -> IO Tea
 correctFamily fs t = do
     case get fam t of
         Left n -> do
-            let nFam = find ((==n) . get F.name) fs
+            let nFam = DL.find ((==n) . get F.name) fs
             case nFam of
                 Nothing -> return t
                 Just f -> return $ set fam (Right f) t

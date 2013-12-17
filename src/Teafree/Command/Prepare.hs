@@ -50,8 +50,8 @@ prepare = do
         Just t -> do
             liftIO . threadDelay . (*1000000) . toSeconds $ Tea.time t
             send $ def title (T.pack . show . ppName False $ t)
-                 . def body (T.pack "Your tea is ready")
-                 . def N.icon (T.pack $ Tea.icon t)
+                 . def body ("Your tea is ready")
+                 . def N.icon (Tea.icon t)
                  . def duration 0
                  . def urgency (T.pack "critical")
                  $ notification

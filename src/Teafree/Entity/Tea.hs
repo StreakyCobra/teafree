@@ -25,18 +25,21 @@ module Teafree.Entity.Tea where
 
 import Data.Label
 import Text.Printf
-import Text.PrettyPrint.ANSI.Leijen
+import Text.PrettyPrint.ANSI.Leijen as PP
 
 import Teafree.Interaction.PPrint
 import Teafree.Entity.Units
 import qualified Teafree.Entity.Family as F
 
+import Data.Text as T
+default (T.Text)
+
 
 fclabels [d|
     data Tea = Tea
-        { name         :: String
-        , fam          :: Either String F.Family
-        , production   :: Maybe String
+        { name         :: Text
+        , fam          :: Either Text F.Family
+        , production   :: Maybe Text
         , _quantity    :: Maybe Quantity
         , _temperature :: Maybe Temperature
         , _time        :: Maybe Time
@@ -48,16 +51,16 @@ instance Show Tea where
     show = show . pprint False
 
 instance PPrint Tea where
-    ppName c v = i (bold . dullred) $ text . get name $ v
+    ppName c v = i (bold . dullred) $ text . T.unpack . get name $ v
             where i f = if c then f else id
 
     ppDetails c t = text (printf "%-15s" "Family:") <+> case get fam t of
                                                             Left _ -> (i (bold . dullred)) . text $ "/!\\ Wrong family"
-                                                            Right v -> (i (bold . dullgreen) . text . get F.name $ v)
+                                                            Right v -> (i (bold . dullgreen) . text . T.unpack . get F.name $ v)
                      <$>
                     case get production t of
-                        Nothing -> empty
-                        Just v -> text (printf "%-15s" "Production:") <+> (i (bold . dullblue) . text $ v) <$> empty
+                        Nothing -> PP.empty
+                        Just v -> text (printf "%-15s" "Production:") <+> (i (bold . dullblue) . text . T.unpack $ v) <$> PP.empty
                     <>
                     text (printf "%-15s" "Quantity:") <+> (pprint c $ quantity t) <$>
                     text (printf "%-15s" "Temperature:") <+> (pprint c $ temperature t) <$>
@@ -66,10 +69,10 @@ instance PPrint Tea where
                         case (cafeine t) of
                             Just v -> pprint c v <+> text "of coffee"
                             Nothing -> i yellow $ text "Unknown"
-                    <$> empty
+                    <$> PP.empty
             where i f = if c then f else id
 
-    ppSummary c v = text (get name v) <+> text " (" <>
+    ppSummary c v = text (T.unpack $ get name v) <+> text " (" <>
                     (pprint c $ quantity v) <> text " | " <>
                     (pprint c $ temperature v) <> text " | " <>
                     (pprint c $ time v) <>
@@ -106,7 +109,7 @@ cafeine t = case (get _cafeine t) of
                                    Right f -> get F.cafeine f
                     v@(Just _) -> v
 
-icon :: Tea -> String
+icon :: Tea -> Text
 icon t = case (get fam t) of
              Left _ -> undefined
              Right f -> get F.icon f

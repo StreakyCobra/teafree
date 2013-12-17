@@ -47,7 +47,7 @@ info = do
         Nothing -> sendError "The selected tea is not found"
         Just t -> send $ def title (T.pack . show . ppName False $ t)
                       . def body (T.pack . show . ppDetails False $ t)
-                      . def N.icon (T.pack $ Tea.icon t)
+                      . def N.icon (Tea.icon t)
                       . def duration 0
                       . def urgency "normal"
                       $ notification

@@ -21,14 +21,18 @@ module Teafree.Core.Parsers where
 
 
 import Control.Applicative ((<*), (*>), (<*>), (<$>), pure)
-import Text.ParserCombinators.Parsec
+import Text.Parsec
+import Text.Parsec.Text
 
 import qualified Teafree.Entity.Family as F
 import qualified Teafree.Entity.Tea as T
 import qualified Teafree.Entity.Units as U
 
+import Data.Text as T
+default (T.Text)
 
-parseTeas :: String -> Either ParseError [T.Tea]
+
+parseTeas :: Text -> Either ParseError [T.Tea]
 parseTeas = parse pTeasFile ""
 
 pTeasFile :: Parser [T.Tea]
@@ -36,9 +40,9 @@ pTeasFile = many pTea <* eof
 
 pTea :: Parser T.Tea
 pTea = do
-    name <- pField "Name" pString
-    fam <- pField "Family" pString
-    production <- optionMaybe . try $ pField "Production" pString
+    name <- pField "Name" pText
+    fam <- pField "Family" pText
+    production <- optionMaybe . try $ pField "Production" pText
     quantity <- optionMaybe . try $ pField "Quantity" pQuantity
     temperature <- optionMaybe . try $ pField "Temperature" pTemperature
     time <- optionMaybe . try $ pField "Time" pTime
@@ -49,7 +53,7 @@ pTea = do
 
     return aTea
 
-parseFamilies :: String -> Either ParseError [F.Family]
+parseFamilies :: Text -> Either ParseError [F.Family]
 parseFamilies = parse pFamiliesFile ""
 
 pFamiliesFile :: Parser [F.Family]
@@ -57,8 +61,8 @@ pFamiliesFile = many pFamily <* eof
 
 pFamily :: Parser F.Family
 pFamily = do
-    name <- pField "Name" pString
-    icon <- pField "Icon" pString
+    name <- pField "Name" pText
+    icon <- pField "Icon" pText
     quantity <- pField "Quantity" pQuantity
     temperature <- pField "Temperature" pTemperature
     time <- pField "Time" pTime
@@ -89,8 +93,8 @@ pField s r = do
         skipMany eol
         pSpaces *> string s *> pSpaces *> string ":" *> pSpaces *> r <* pSpaces <* eol
 
-pString :: Parser [Char]
-pString = id <$> many1 (noneOf "\n#")
+pText :: Parser Text
+pText = T.pack <$> many1 (noneOf "\n#")
 
 pInt :: Parser Int
 pInt = read <$> many1 digit

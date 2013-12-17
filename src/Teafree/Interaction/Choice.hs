@@ -48,13 +48,13 @@ chooseTea = chooseItem teas (get Tea.name)
 chooseFamily :: Teafree (Maybe Family)
 chooseFamily = chooseItem families (get Fam.name)
 
-chooseItem :: (Environment :-> [a]) -> (a -> String) -> Teafree (Maybe a)
+chooseItem :: (Environment :-> [a]) -> (a -> Text) -> Teafree (Maybe a)
 chooseItem a f = do
     env <- ask
     choice <- chooseText . listToText f $ get a env
     case choice of
         "" -> return Nothing
-        _ -> forName a f $ DL.init . T.unpack $ choice
+        _ -> forName a f $ T.init $ choice
 
 chooseText :: Text -> Teafree Text
 chooseText t = shellyNoDir $ silently $ print_stdout False $ return t -|- chooser
@@ -64,11 +64,11 @@ chooser = catch_sh
             (run "dmenu" ["-i", "-p", "teafree:", "-l", "10"])
             ((\_ -> return "") :: SomeException -> Sh Text)
 
-forName :: (Environment :-> [a]) -> (a -> String) -> String -> Teafree (Maybe a)
+forName :: (Environment :-> [a]) -> (a -> Text) -> Text -> Teafree (Maybe a)
 forName a f s = do
     env <- ask
     return . DL.find ((==s) . f) $ get a env
 
-listToText :: (a -> String) -> [a] -> Text
-listToText f = T.unlines . map (T.pack . f)
+listToText :: (a -> Text) -> [a] -> Text
+listToText f = T.unlines . map f
 
