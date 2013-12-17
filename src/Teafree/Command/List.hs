@@ -27,14 +27,17 @@ import Teafree.Core.Environment
 import Teafree.Core.Monad
 import Teafree.Interaction.PPrint
 
+import Text.PrettyPrint.ANSI.Leijen
+
 
 printList :: String -> Teafree ()
 printList "teas" = do
     content <- ask
-    liftIO $ putStr . unlines . map (show . pprint True) $ get teas content
+    liftIO $ putStr . unlines . map (flip (++) "\n" . show . pprint True) $ get teas content
 
 printList "families" = do
     content <- ask
     liftIO $ putStr . unlines . map (show . pprint True) $ get families content
 
 printList w = failure $ "There is no list of \"" ++ w ++ "\""
+

@@ -27,12 +27,13 @@ module Teafree.Command.Info
 
 import Prelude as P
 
-import Teafree.Core.Environment
 import Teafree.Core.Monad
+
 import Teafree.Interaction.PPrint
 import Teafree.Interaction.Notify as N
 import Teafree.Interaction.Choice
-import Teafree.Entity.Tea as Tea
+
+import qualified Teafree.Entity.Tea as Tea
 
 import Data.Text as T
 default (T.Text)
@@ -45,9 +46,9 @@ info = do
 
     case choice of
         Nothing -> sendError "The selected tea is not found"
-        Just t -> send $ def title (T.pack . show . ppName False $ t)
+        Just t -> send . def title (T.pack . show . ppName False $ t)
                       . def body (T.pack . show . ppDetails False $ t)
-                      . def N.icon (Tea.icon t)
+                      . def icon (Tea.icon t)
                       . def duration 0
                       . def urgency "normal"
                       $ notification

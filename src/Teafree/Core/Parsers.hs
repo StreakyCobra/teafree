@@ -24,21 +24,21 @@ import Control.Applicative ((<*), (*>), (<*>), (<$>), pure)
 import Text.Parsec
 import Text.Parsec.Text
 
-import qualified Teafree.Entity.Family as F
-import qualified Teafree.Entity.Tea as T
+import qualified Teafree.Entity.Family as Fam
+import qualified Teafree.Entity.Tea as Tea
 import qualified Teafree.Entity.Units as U
 
 import Data.Text as T
 default (T.Text)
 
 
-parseTeas :: Text -> Either ParseError [T.Tea]
+parseTeas :: Text -> Either ParseError [Tea.Tea]
 parseTeas = parse pTeasFile ""
 
-pTeasFile :: Parser [T.Tea]
+pTeasFile :: Parser [Tea.Tea]
 pTeasFile = many pTea <* eof
 
-pTea :: Parser T.Tea
+pTea :: Parser Tea.Tea
 pTea = do
     name <- pField "Name" pText
     fam <- pField "Family" pText
@@ -47,19 +47,20 @@ pTea = do
     temperature <- optionMaybe . try $ pField "Temperature" pTemperature
     time <- optionMaybe . try $ pField "Time" pTime
     cafeine <- optionMaybe . try $ pField "Cafeine" pPercentage
+    note <- optionMaybe . try $ pNote
     skipMany eol
 
-    let aTea = T.Tea name (Left fam) production quantity temperature time cafeine
+    let aTea = Tea.Tea name (Left fam) production quantity temperature time cafeine note
 
     return aTea
 
-parseFamilies :: Text -> Either ParseError [F.Family]
+parseFamilies :: Text -> Either ParseError [Fam.Family]
 parseFamilies = parse pFamiliesFile ""
 
-pFamiliesFile :: Parser [F.Family]
+pFamiliesFile :: Parser [Fam.Family]
 pFamiliesFile = many pFamily <* eof
 
-pFamily :: Parser F.Family
+pFamily :: Parser Fam.Family
 pFamily = do
     name <- pField "Name" pText
     icon <- pField "Icon" pText
@@ -69,7 +70,7 @@ pFamily = do
     cafeine <- optionMaybe $ pField "Cafeine" pPercentage
     skipMany eol
 
-    let aFamily = F.Family name icon quantity temperature time cafeine
+    let aFamily = Fam.Family name icon quantity temperature time cafeine
 
     return aFamily
 
@@ -93,8 +94,12 @@ pField s r = do
         skipMany eol
         pSpaces *> string s *> pSpaces *> string ":" *> pSpaces *> r <* pSpaces <* eol
 
+pNote :: Parser [Text]
+pNote = T.lines . T.pack <$> (sep *> manyTill anyChar (try sep))
+    where sep = string "---\n"
+
 pText :: Parser Text
-pText = T.pack <$> many1 (noneOf "\n#")
+pText = T.strip . T.pack <$> many1 (noneOf "\n#")
 
 pInt :: Parser Int
 pInt = read <$> many1 digit

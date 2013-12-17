@@ -24,6 +24,7 @@ module Teafree.Entity.Tea where
 
 
 import Data.Label
+import Prelude as P
 import Text.Printf
 import Text.PrettyPrint.ANSI.Leijen as PP
 
@@ -44,6 +45,7 @@ fclabels [d|
         , _temperature :: Maybe Temperature
         , _time        :: Maybe Time
         , _cafeine     :: Maybe Percentage
+        , note         :: Maybe [Text]
         }
     |]
 
@@ -66,10 +68,12 @@ instance PPrint Tea where
                     text (printf "%-15s" "Temperature:") <+> (pprint c $ temperature t) <$>
                     text (printf "%-15s" "Time:") <+> (pprint c $ time t) <$>
                     text (printf "%-15s" "Cafeine:") <+>
-                        case (cafeine t) of
-                            Just v -> pprint c v <+> text "of coffee"
-                            Nothing -> i yellow $ text "Unknown"
-                    <$> PP.empty
+                    case (cafeine t) of
+                        Just v -> pprint c v <+> text "of coffee"
+                        Nothing -> i yellow $ text "Unknown"
+                    <> case get note t of
+                            Just v -> PP.empty <$> PP.empty <$> P.foldr1 (<$>) (P.map (text . T.unpack) v)
+                            Nothing -> PP.empty
             where i f = if c then f else id
 
     ppSummary c v = text (T.unpack $ get name v) <+> text " (" <>
