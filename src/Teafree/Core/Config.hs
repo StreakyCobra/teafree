@@ -105,7 +105,6 @@ getOrCopyConfigFileName f = do
     fileExist <- doesFileExist file
     when (not fileExist) $ do
         original <- getDataFileName f
-        print original
         copyFile original file
     return file
 

@@ -67,7 +67,7 @@ pFamily = do
     quantity <- pField "Quantity" pQuantity
     temperature <- pField "Temperature" pTemperature
     time <- pField "Time" pTime
-    cafeine <- optionMaybe $ pField "Cafeine" pPercentage
+    cafeine <- optionMaybe . try $ pField "Cafeine" pPercentage
     skipMany eol
 
     let aFamily = Fam.Family name icon quantity temperature time cafeine
@@ -163,7 +163,6 @@ pSecond :: Parser Int
 pSecond = do
     value <- pInt <* pSpaces <* string "s" <* optional (char '.')
     return . (*1) $ value
-
 
 pPercentage :: Parser U.Percentage
 pPercentage = do
