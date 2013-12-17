@@ -54,19 +54,13 @@ getEnvironment = do
              Left e -> failure $ "Problem when parsing teas:\n\n" ++ show e
              Right xs -> return xs
 
-    cfs <- mapM correctIcon fs
-    cts <- mapM (correctFamily cfs) ts
+    cfs <- mapM (correctFamily) fs
+    cts <- mapM (correctTea cfs) ts
 
     return . set teas cts . set families cfs $ defaultEnvironment
 
-correctIcon :: Family -> Teafree Family
-correctIcon f = do
-    nIcon <- liftIO $ getDataFileName $ T.unpack $ get F.icon f
-    let nFam = set F.icon (T.pack nIcon) f
-    return nFam
-
-correctFamily :: [Family] -> Tea -> Teafree Tea
-correctFamily fs t = do
+correctTea :: [Family] -> Tea -> Teafree Tea
+correctTea fs t = do
     case get fam t of
         Left n -> do
             let nFam = DL.find ((==n) . get F.name) fs
@@ -74,6 +68,14 @@ correctFamily fs t = do
                 Nothing -> failure $ "The family \"" ++ (T.unpack n) ++ "\" doesn't exist"
                 Just f -> return $ set fam (Right f) t
         Right _ -> return t
+
+correctFamily :: Family -> Teafree Family
+correctFamily f = do
+    env <- ask
+    let funcQ = get quantityTo env
+    let funcT = get temperatureTo env
+    nIcon <- liftIO $ getDataFileName $ T.unpack $ get F.icon f
+    return . modify F.quantity funcQ . modify F.temperature funcT . set F.icon (T.pack nIcon) $ f
 
 getConfigDirectory :: IO FilePath
 getConfigDirectory = do

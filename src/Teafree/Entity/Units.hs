@@ -24,8 +24,13 @@ module Teafree.Entity.Units
     , Quantity (..)
     , Time (..)
     , toSeconds
+    , toDl
+    , toOz
+    , toC
+    , toF
     ) where
 
+import Data.Ratio
 
 import Teafree.Interaction.PPrint
 
@@ -110,3 +115,23 @@ instance PPrint Percentage where
 toSeconds :: Time -> Int
 toSeconds (Second s) = s
 
+toDl :: Quantity -> Quantity
+toDl (TspDl v) = TspDl v
+toDl (TspOz v) = TspDl v
+
+toOz :: Quantity -> Quantity
+toOz (TspOz v) = TspOz v
+toOz (TspDl v) = TspOz v
+
+toF :: Temperature -> Temperature
+toF (Fahrenheit v) = Fahrenheit v
+toF (Celsius v) = Fahrenheit . roundTo 5 . round $ (fromIntegral v) * (9.0 / 5.0) + 32.0
+
+toC :: Temperature -> Temperature
+toC (Celsius v) = Celsius v
+toC (Fahrenheit v) = Celsius . roundTo 5 . round $ ((fromIntegral v) - 32) * (5.0 / 9.0)
+
+roundTo :: Int -> Int -> Int
+roundTo a v = a * q + u
+    where (q, r) = quotRem v a
+          u = if (fromIntegral r) > ((fromIntegral a) / 2) then a else 0

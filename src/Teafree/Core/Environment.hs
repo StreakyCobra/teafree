@@ -28,6 +28,8 @@ module Teafree.Core.Environment
     , modify
     , teas
     , families
+    , quantityTo
+    , temperatureTo
     ) where
 
 
@@ -42,6 +44,7 @@ import Paths_teafree
 import Teafree.Core.Parsers
 import Teafree.Entity.Family as F
 import Teafree.Entity.Tea as Tea
+import Teafree.Entity.Units as U
 
 import Data.Text as T
 import Data.Text.IO as TIO
@@ -50,11 +53,13 @@ default (T.Text)
 
 fclabels [d|
     data Environment = Environment
-        { teas         :: [Tea]
-        , families     :: [Family]
-        } deriving (Show)
+        { teas           :: [Tea]
+        , families       :: [Family]
+        , quantityTo     :: U.Quantity -> U.Quantity
+        , temperatureTo  :: U.Temperature -> U.Temperature
+        }
     |]
 
 defaultEnvironment :: Environment
-defaultEnvironment = Environment [] []
+defaultEnvironment = Environment [] [] U.toDl U.toC
 
