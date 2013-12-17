@@ -22,7 +22,7 @@
 
 module Teafree.Core.Environment
     ( Environment
-    , getEnvironment
+    , defaultEnvironment
     , get
     , set
     , modify
@@ -57,73 +57,4 @@ fclabels [d|
 
 defaultEnvironment :: Environment
 defaultEnvironment = Environment [] []
-
-getEnvironment :: IO Environment
-getEnvironment = do
-    fContent <- getOrCopyConfigFileName "families.txt" >>= TIO.readFile
-    tContent <- getOrCopyConfigFileName "teas.txt" >>= TIO.readFile
-
-    let fParsed = parseFamilies fContent
-    let tParsed = parseTeas tContent
-
-    let fs = case fParsed of
-                 Left _ -> []
-                 Right xs -> xs
-
-    let ts = case tParsed of
-                 Left _ -> []
-                 Right xs -> xs
-
-    cfs <- mapM correctIcon fs
-    cts <- mapM (correctFamily cfs) ts
-
-    return . set teas cts . set families cfs $ defaultEnvironment
-
-correctIcon :: Family -> IO Family
-correctIcon f = do
-    nIcon <- getDataFileName $ T.unpack $ get F.icon f
-    let nFam = set F.icon (T.pack nIcon) f
-    return nFam
-
-correctFamily :: [Family] -> Tea -> IO Tea
-correctFamily fs t = do
-    case get fam t of
-        Left n -> do
-            let nFam = DL.find ((==n) . get F.name) fs
-            case nFam of
-                Nothing -> return t
-                Just f -> return $ set fam (Right f) t
-        Right _ -> return t
-
-getConfigDirectory :: IO FilePath
-getConfigDirectory = do
-    configHomeVar <- lookupEnv "XDG_CONFIG_HOME"
-
-    let configHome = case configHomeVar of
-                   Just v -> v
-                   Nothing -> "$HOME/.config"
-
-    let configDir = configHome </> "teafree"
-
-    dirExist <- doesDirectoryExist configDir
-
-    when (not dirExist) $ do
-        createDirectory configDir
-
-    return configDir
-
-getConfigFileName :: FilePath -> IO FilePath
-getConfigFileName f = do
-    configDir <- getConfigDirectory
-    return $ configDir </> f
-
-getOrCopyConfigFileName :: FilePath -> IO FilePath
-getOrCopyConfigFileName f = do
-    file <- getConfigFileName f
-    fileExist <- doesFileExist file
-    when (not fileExist) $ do
-        original <- getDataFileName f
-        print original
-        copyFile original file
-    return file
 

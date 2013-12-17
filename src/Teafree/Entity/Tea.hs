@@ -88,7 +88,7 @@ instance PPrint Tea where
 quantity :: Tea -> Quantity
 quantity t = case (get _quantity t) of
                  Nothing -> case (get fam t) of
-                                Left _ -> undefined
+                                Left _ -> error "Wrong family"
                                 Right f -> get F.quantity f
                  Just v -> v
 
