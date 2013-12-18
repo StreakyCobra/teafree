@@ -1,7 +1,7 @@
 Name        : Bai Mu Dan Supérieur
 Family      : White Tea
 Production  : Fujian Chine
-Quantity    : 2 tsp/dl
+Quantity    : 2 tsp/2dl
 Temperature : 80 °C
 Time        : 4m
 
